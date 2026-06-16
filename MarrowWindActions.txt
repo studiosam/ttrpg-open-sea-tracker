@@ -1,0 +1,83 @@
+0 Labor - 1 Player - 1 Turn
+-Inventory Food
+-Inventory Water
+-Inventory Repair Supplies
+-Inventory Cargo
+-Study a Map to Determine Approximate Travel Time Remaining
+-Examine the Bilge Sounding Rod for Water Levels
+Updates the total amount of each resource available to the player. 
+
+1 Labor - 1 Player - 1 Turn
+-Man the Helm
+Survival DC 12
+Success: Reduce Travel Time by 0.25 days
+Sailor and Pirate Backgrounds roll with advantage
+
+-Operate the Bilge Pump (solo)
+Strength DC 15
+Success: Reduce Water Level by 3
+Failure: Reduce Water Level by 2
+
+-Harpoon Fishing (solo)
+Survival DC 18: +0.5 Food
+Survival DC 20: +1.0 Food
+
+-Reset the Fishing Net
+Required after every use of the net to make the net available again
+
+-Repair Bilge Pump
+Required if the Bilge Pump jams to make the Bilge Pump usable on the next turn
+
+-Inventory Cargo, Water, Food, or Repair Supplies
+Updates the player's knowledge about the values of the category inventoried
+
+-Study Map
+Updates the player's knowledge about the distance to their destination
+
+1 Labor - 1 Player - 2 Turns
+-Bucket Brigade
+Fill buckets with water and Dump water overboard
+Reduce Water Level by 1
+
+-Recover
+No actions are taken for 2 turns and the player recovers either 2 Labor Points or 1 Level of Exhaustion
+
+1 Labor per Player - 2 Players - 1 Turn
+-Operate Bilge Pump (cooperative)
+Strength DC 15 (both players roll, only one success is required)
+Success: Reduce Water Level by 4
+Failure: Reduce Water Level by 3
+
+-Minor Repair
+1 Active Leak is removed
+
+-Cast Fishing Net
+Survival DC 15 (both players roll)
+Each success grants +0.25 days rations
+Net must be untangled for a turn before it can be used again
+
+-Harpoon Fishing (cooperative)
+Survival Roll (both players roll, only higher roll counts)
+DC 15 +0.5 days rations
+DC 18 +1.0 days rations
+DC 20: +2 days rations
+
+2 Labor - 2 Players - 2 Turns
+-Repair Mast
+-Repair Rudder
+
+Labor and Exhaustion Rules
+Each character can ccumulate up to 3 Labor Points safely. Taking a Labor actions while already at 3 Labor requires a Constution Save with an increasing DC based on this table
+Labor Amount	CON DC
+4		12
+5		14
+6		16
+7		18
+8		20
+Failure: Gain 1 Level of Exhaustion
+Success: No Exhaustion but still gain the Labor Point
+
+Water System
+At the end of every turn: Water Level += Water ingress + # of Active Leaks
+Minimum Water Ingress starts at 2 and cannot be lowered
+Actions can be taken to lower the water level
