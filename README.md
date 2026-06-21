@@ -18,6 +18,7 @@ Current features include:
 - Player-facing display screen
 - Startup landing screen
 - New voyage setup screen
+- DM tracker link to manually open the player view
 - Configurable ship name
 - Configurable crew size
 - Configurable crew names
@@ -33,6 +34,8 @@ Current features include:
 - Required checks and saves
 - Water ingress tracking
 - Course Meter and travel tracking
+- Repair-material requirements for repair actions
+- Salvage Lumber action for recovering repair supplies
 - Player knowledge and hidden information
 - Save, load, export, import, reset, and undo
 - Input validation and import hardening
@@ -71,6 +74,8 @@ To start a new voyage:
 5. If an existing save is present, confirm that you want to replace it.
 
 **Start Voyage** creates the tracker state, saves it to browser storage, publishes the player-safe state, and enters the tracker screen.
+
+Once the tracker screen is open, use **Open Player View** in the DM header to open the player-facing page in a new tab. The player view is not opened automatically and is not linked from the landing screen.
 
 ## Player Screen
 
@@ -111,7 +116,8 @@ No server or build step is required. The app can be opened directly in a browser
 # Recommended Screen Setup
 
 - Put `open_sea_tracker.html` on the DM/private monitor.
-- Put `player_view.html` fullscreen on the player-facing monitor.
+- After the tracker screen is open, click **Open Player View** in the DM header.
+- Put the opened `player_view.html` tab fullscreen on the player-facing monitor.
 - Open both pages in the same browser profile.
 - If the player screen does not update, refresh `player_view.html` once after opening the DM tracker.
 
@@ -156,7 +162,6 @@ No server or build step is required. The app can be opened directly in a browser
 - `docs/ROADMAP.md` - development roadmap.
 - `docs/design_document.txt` - system design notes and turn structure.
 - `docs/MarrowWindActions.txt` - current action reference.
-- `docs/CHANGELOG.md` - practical current-state history notes.
 
 ---
 
@@ -346,6 +351,9 @@ Important behavior:
 - Ongoing multi-turn work is automatically selected on following turns.
 - Use `Clear` on a character row to clear that character's planned action.
 - Use `Set Unset to Idle` to quickly fill empty actions before advancing.
+- Repair actions cannot be confirmed without enough Repair Supplies.
+- `Salvage Lumber` is a 1-person, 1-turn, 1-Labor action that adds 2 Repair Supplies.
+- `Salvage Lumber` includes an above/below-deck checkbox. If it is below deck, flooding penalties apply.
 
 ---
 
@@ -580,6 +588,7 @@ The manual checklist covers browser behavior that the automated tests do not ful
 - DM screen loading
 - Player screen loading
 - Startup landing screen behavior
+- DM tracker `Open Player View` link
 - New voyage setup behavior
 - Setup validation
 - Save-overwrite protection

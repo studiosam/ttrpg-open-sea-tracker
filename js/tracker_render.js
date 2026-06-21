@@ -268,8 +268,7 @@ function voyageScoreCard() {
         controls:
           scoreMiniControls('courseMeter', 1) +
           metricKnowledgeControls('courseState', 'Reveal Course'),
-        detail: courseState.name,
-        className: 'course-state-score-metric'
+        detail: courseState.name
       }
     ],
     footer: { title: courseState.name, summary: detail }

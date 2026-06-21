@@ -12,8 +12,11 @@ The tracker should automate bookkeeping, not replace DM judgment. Manual overrid
 
 Primary entry points:
 
+`index.html` redirects to the DM tracker for GitHub Pages.
 `open_sea_tracker.html`
 `player_view.html`
+
+The player view is opened manually from the DM tracker header after a voyage is started, resumed, or imported. The app should not automatically open player-view popups.
 
 Preserve and improve the current structure incrementally unless the existing structure is unusable.
 
@@ -25,17 +28,21 @@ DM tracker script order:
 
 1. `js/action_metadata.js`
 2. `js/tracker_state.js`
-3. `js/tracker_render.js`
-4. `js/tracker_gameplay.js`
-5. `js/tracker_persistence.js`
-6. `js/tracker.js`
+3. `js/tracker_render_setup.js`
+4. `js/tracker_render.js`
+5. `js/tracker_gameplay.js`
+6. `js/tracker_persistence.js`
+7. `js/tracker_setup.js`
+8. `js/tracker.js`
 
 Responsibilities:
 
 * `js/tracker_state.js` contains shared state, rule tables, and low-level rule helpers.
-* `js/tracker_render.js` contains DM screen rendering and UI view helpers.
+* `js/tracker_render_setup.js` contains landing/setup rendering.
+* `js/tracker_render.js` contains the main DM render dispatcher, tracker-screen rendering, and UI view helpers.
 * `js/tracker_gameplay.js` contains DM action handlers, prompts, turn flow, events, meals, and overtime behavior.
 * `js/tracker_persistence.js` contains save/load, export/import, player-state publishing, validation, migration, and labels.
+* `js/tracker_setup.js` contains setup-mode behavior and setup-to-state creation.
 * `js/tracker.js` only boots the tracker after support scripts are loaded.
 * `tests/` contains Node tests that load the browser scripts in a VM and exercise validation, migration, import safety, and event-binding coverage.
 
@@ -338,6 +345,7 @@ Repair Active Leak
 * Repairs 1 Active Leak.
 * Automatic, no skill check.
 * Normally 1 Turn and 1 Labor for 2 Players.
+* Requires 1 Repair Supply per leak repaired.
 * If Water Level is 5+, takes +1 turn.
 * If Water Level is 10+, costs +1 additional Labor.
 
@@ -345,16 +353,16 @@ Repair Bilge Pump
 
 * Repairs Jammed pump.
 * Normally 1 turn and 1 Labor.
-* If Water Level is 5+ and the repair is below deck, takes +1 turn.
-* If Water Level is 10+, costs +1 additional Labor.
+* Requires 1 Repair Supply.
 
 Repair Rigging
 
 * Repairs Broken rigging.
 * Normally 1 turn and 1 Labor.
+* Requires 1 Repair Supply.
 * Character repairing rigging makes DC 13 Dexterity save or takes 2d6 bludgeoning damage.
 
-Untangle Net
+Reset Fishing Net
 
 * Makes Net Ready.
 * Normally 1 turn and 1 Labor.
@@ -367,6 +375,13 @@ Recover Floating Wreckage
 * DC 12 Dexterity or Athletics.
 * On success, gain salvaged timber.
 * Salvaged timber may be consumed at any future time to repair two Active Leaks without Labor.
+
+Salvage Lumber
+
+* Normally 1 turn and 1 Labor for 1 player.
+* Adds 2 Repair Supplies when completed.
+* Roleplay determines whether the salvage is above deck or below deck.
+* If marked below deck, flooding penalties apply as normal.
 
 Bucket Brigade
 
@@ -412,6 +427,7 @@ Major Repair: Mast or Rudder
 * Requires 2 players.
 * Takes 2 turns.
 * Costs Labor according to the current tracker design.
+* Requires 1 Repair Supply.
 * If Water Level is 5+, takes +1 turn.
 * If Water Level is 10+, costs +1 additional Labor.
 * Mast controls sail progress; while broken, Helm cannot make travel progress.
@@ -467,7 +483,7 @@ Jammed Bilge Pump
 
 Tangled Net
 
-* Cast Net cannot be used until Untangle Net is completed.
+* Cast Net cannot be used until Reset Fishing Net is completed.
 
 ## Scripted Events
 

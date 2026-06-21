@@ -52,9 +52,15 @@ Required after every use of the net to make the net available again
 
 -Repair Bilge Pump
 Required if the Bilge Pump jams to make the Bilge Pump usable on the next turn
+Requires 1 Repair Supply
 
 -Inventory Cargo, Water, Food, or Repair Supplies
 Updates the player's knowledge about the values of the category inventoried
+
+-Salvage Lumber
+Roleplay determines whether the salvage is above deck or below deck
+If below deck, flooding penalties apply as normal
+Gain +2 Repair Supplies when completed
 
 1 Labor - 1 Player - 2 Turns
 -Bucket Brigade
@@ -70,8 +76,9 @@ Strength DC 15 (both players roll, only one success is required)
 Success: Reduce Water Level by 4
 Failure: Reduce Water Level by 3
 
--Minor Repair
+-Repair Active Leak
 1 Active Leak is removed
+Requires 1 Repair Supply per leak repaired
 
 -Cast Fishing Net
 Survival DC 15 (both players roll)
@@ -88,10 +95,12 @@ Fisherman background rolls with advantage on that participant's check
 
 2 Labor - 2 Players - 2 Turns
 -Repair Mast
+Requires 1 Repair Supply
 -Repair Rudder
+Requires 1 Repair Supply
 
 Labor and Exhaustion Rules
-Each character can ccumulate up to 3 Labor Points safely. Taking a Labor actions while already at 3 Labor requires a Constution Save with an increasing DC based on this table
+Each character can accumulate up to 3 Labor Points safely. Taking a Labor action while already at 3 Labor requires a Constitution Save with an increasing DC based on this table
 Labor Amount	CON DC
 4		12
 5		14

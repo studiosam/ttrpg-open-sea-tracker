@@ -45,7 +45,8 @@ Recommended browsers:
 Recommended local setup:
 
 - Open the DM screen: `open_sea_tracker.html`
-- Open the player screen: `player_view.html`
+- Start, resume, or import a voyage.
+- Use **Open Player View** in the DM tracker header to open `player_view.html`.
 - Open both pages in the same browser profile so localStorage sync works.
 - Open DevTools Console on both pages.
 
@@ -115,6 +116,7 @@ Confirm:
 - [ ] `Resume Current Voyage` is visible.
 - [ ] If no saved voyage exists in this browser profile, `Resume Current Voyage` is disabled or clearly unavailable.
 - [ ] If a saved voyage exists in this browser profile, `Resume Current Voyage` is enabled.
+- [ ] `Open Player View` is not shown on the landing screen.
 - [ ] The tracker screen is not shown until a voyage is started, resumed, or imported.
 - [ ] The DevTools Console shows no serious console errors.
 
@@ -220,7 +222,9 @@ From the setup screen:
 - [ ] Confirm the custom ship name appears on the DM screen.
 - [ ] Confirm the active crew names appear on the DM screen.
 - [ ] Confirm the activity log records that a new voyage was started.
-- [ ] Open or refresh `player_view.html`.
+- [ ] Confirm `Open Player View` is visible in the DM tracker header.
+- [ ] Click `Open Player View`.
+- [ ] Confirm `player_view.html` opens in a new tab.
 - [ ] Confirm the custom ship name appears on the player screen.
 - [ ] Confirm the active crew names appear on the player screen.
 - [ ] Confirm hidden player information remains hidden.
@@ -263,7 +267,7 @@ Expected behavior:
 
 # 8. Player Screen Initial Load
 
-Open `player_view.html` in the same browser profile after a voyage has been started, resumed, or imported.
+Open `player_view.html` in the same browser profile after a voyage has been started, resumed, or imported. Prefer using **Open Player View** from the DM tracker header.
 
 Confirm:
 
@@ -549,6 +553,17 @@ On the DM screen:
 - [ ] Repeat with fresh water.
 - [ ] Repeat with repair supplies.
 - [ ] Confirm each inventory action logs correctly.
+- [ ] Set Repair Supplies to 0.
+- [ ] Confirm repair actions are unavailable or cannot be confirmed.
+- [ ] Restore or add Repair Supplies.
+- [ ] Confirm repair actions become available when their other requirements are met.
+- [ ] Assign a crew member to `Salvage Lumber`.
+- [ ] Confirm the above/below-deck checkbox appears for that action.
+- [ ] Leave the checkbox unchecked and confirm the action is treated as above deck.
+- [ ] Complete `Salvage Lumber`.
+- [ ] Confirm Repair Supplies increase by 2.
+- [ ] If testing flooding penalties, repeat with the below-deck checkbox checked and water at cargo-hold/waist-deep levels.
+- [ ] Confirm below-deck flooding adds the expected extra turn and/or Labor penalty.
 
 On the player screen:
 

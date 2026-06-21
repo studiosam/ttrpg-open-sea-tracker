@@ -114,7 +114,3 @@ function setSetupCrewTrait(index, field, checked) {
     character[field] = Boolean(checked);
   }
 }
-
-function setSetupCrewBackground(index, checked) {
-  setSetupCrewTrait(index, 'sailorPirateBackground', checked);
-}

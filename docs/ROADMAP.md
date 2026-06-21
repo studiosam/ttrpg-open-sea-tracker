@@ -2,7 +2,7 @@
 
 This roadmap tracks the current direction for the Open Sea Tracker project.
 
-The project began as the Marrowwind voyage tracker for one campaign, but the long-term goal is to turn it into a reusable browser-based encounter tracker for dangerous sea travel and other high-bookkeeping tabletop scenarios.
+The project began as the Marrowwind voyage tracker for one campaign. The long-term goal is to turn it into a reusable browser-based encounter tracker for dangerous sea travel and other high-bookkeeping tabletop scenarios.
 
 ---
 
@@ -10,36 +10,44 @@ The project began as the Marrowwind voyage tracker for one campaign, but the lon
 
 The project is a working MVP.
 
-The core tracker can now be used at the table with a DM screen and a player-facing screen. It has automated tests, formatting checks, syntax checks, GitHub Actions CI, manual browser testing documentation, import/export support, save protection, and a functional new-voyage setup flow.
-
-## Completed Core Systems
-
-- DM-facing tracker screen
-- Player-facing display screen
-- Browser `localStorage` saving
-- Export and import
-- Import validation and migration
-- Undo support
-- Turn-flow guidance
-- Open Sea Event handling
-- Scripted scene turns
-- Crew action assignment
-- Required checks and saves
-- Water ingress tracking
-- Course Meter and travel tracking
-- Player knowledge and hidden information
-- Player-safe state publishing
-- Player view auto-sync through browser storage
-- Activity log
-- Automated Node test suite
-- Prettier formatting
-- Syntax checks
-- GitHub Actions CI
-- Manual browser testing checklist
+The core tracker can now be used at the table with a DM screen and a player-facing screen. It has automated tests, formatting checks, syntax checks, GitHub Actions CI, manual browser testing documentation, import/export support, save protection, a functional new-voyage setup flow, README screenshots, and GitHub Pages deployment.
 
 ---
 
-# Recently Completed Setup Work
+# Completed Core Systems
+
+- DM-facing tracker screen.
+- Player-facing display screen.
+- Browser `localStorage` saving.
+- Export and import.
+- Import validation and migration.
+- Undo support.
+- Turn-flow guidance.
+- Open Sea Event handling.
+- Scripted scene turns.
+- Crew action assignment.
+- Required checks and saves.
+- Water ingress tracking.
+- Course Meter and travel tracking.
+- Repair-material blocking for repair actions.
+- `Salvage Lumber` action for recovering repair supplies.
+- Player knowledge and hidden information.
+- Player-safe state publishing.
+- Player view auto-sync through browser storage.
+- Activity log.
+- Automated Node test suite.
+- Prettier formatting.
+- Syntax checks.
+- GitHub Actions CI.
+- Manual browser testing checklist.
+- README screenshots.
+- GitHub Pages deployment.
+- Root `index.html` redirect/loading page.
+- DM tracker `Open Player View` link after tracker launch.
+
+---
+
+# Completed Setup Work
 
 The landing and setup flow has been completed through Stage 3.
 
@@ -114,78 +122,122 @@ Completed items:
 
 ---
 
-# Current Immediate Priorities
+# Immediate Priorities
 
-These are the next practical steps before adding larger feature systems.
+These are the next practical steps before larger feature systems.
 
-## 1. Run Manual Browser Testing
+## 1. Focused Manual Browser Testing
 
-Status: Next
+Status: In Progress
 
 Use `docs/MANUAL_TESTING.md` to test the current app in a real browser.
 
 Focus areas:
 
-- Landing screen
-- New voyage setup
-- Setup validation
-- Existing-save overwrite protection
-- Resume current voyage
-- Import saved voyage
-- DM tracker load
-- Player view sync
-- Water visibility rules
-- Navigate reveal behavior
-- Scripted scene turn behavior
-- Export/import
-- Invalid import rejection
-- Prompt escaping
-- Layout smoke test
+- Landing screen.
+- New voyage setup.
+- Setup validation.
+- Existing-save overwrite protection.
+- Resume current voyage.
+- Import saved voyage.
+- DM tracker load.
+- Player view sync.
+- DM tracker `Open Player View` link.
+- Repair-material blocking.
+- `Salvage Lumber` above/below-deck behavior.
+- GitHub Pages hosted behavior.
+- Water visibility rules.
+- Navigate reveal behavior.
+- Scripted scene turn behavior.
+- Export/import.
+- Invalid import rejection.
+- Prompt escaping.
+- Layout smoke test.
 
 Reason:
 
-Automated tests are strong, but browser UI behavior, layout, localStorage behavior, and second-screen sync still need manual verification.
+Automated tests are strong, but browser UI behavior, layout, `localStorage` behavior, hosted paths, and second-screen sync still need real-browser verification.
 
-## 2. Add README Screenshots
+## 2. Fix Manual Test Failures
 
-Status: Not Started
+Status: As Needed
 
-Add simple screenshots or images showing:
+Only fix issues that surface during manual testing.
 
-- Landing screen
-- Setup screen
-- DM tracker screen
-- Player screen
+Do not add new feature work during a bug-fix pass unless the fix clearly requires it.
 
-Reason:
+## 3. Keep Documentation Current
 
-The README is now accurate, but screenshots would make the project much easier to understand for another DM or developer.
+Status: Ongoing
 
-## 3. Clean Up Old Scratch Notes
+Review old scratch/staging files before each new feature phase and remove or archive anything that is no longer a source of truth.
 
-Status: Not Started
+Recently completed:
 
-Review `docs/todo.txt` and decide whether to:
-
-- move useful items into this roadmap,
-- rename it to a focused backlog file,
-- or delete it if the content is obsolete.
-
-Known item from the old scratch notes:
-
-- Temporary skeleton helpers
+- Removed obsolete `docs/todo.txt` after preserving the skeleton-helper backlog in this roadmap.
+- Pruned low-risk stale code left by earlier UI iterations.
 
 Reason:
 
-The roadmap should become the main planning document. Loose scratch notes should not become the source of truth.
+The roadmap should be the main planning document. Loose scratch notes should not remain the source of truth.
 
 ---
 
-# Next Feature Phase: First-Time Use Improvements
+# Next Feature Phase: Demo and First-Time Use
 
-The setup flow now works. The next first-time-use work should make setup more useful without turning it into a full scenario builder yet.
+The setup flow works. The next work should make the live app easy to try without requiring someone to configure a real voyage first.
 
-## Starting Presets
+## 1. Demo Mode: Temporary No-Save Sandbox
+
+Status: Next Feature
+
+Goal:
+
+Add a `Load Demo Voyage` option that lets someone try the tracker quickly without replacing a real saved voyage.
+
+Recommended first version:
+
+- Add `Load Demo Voyage` to the landing screen.
+- Use the existing Marrowwind/default initial state.
+- Enter tracker mode immediately.
+- Publish player-safe state so the player screen works.
+- Do not write to the normal saved-voyage slot automatically.
+- Mark the tracker state as demo mode.
+- Show a visible DM-side banner: `Demo Mode — changes are temporary unless saved.`
+- Allow export.
+- Decide whether manual `Save` should convert the demo into a normal saved voyage after confirmation.
+
+Important behavior:
+
+- Loading a demo should not overwrite an existing save.
+- Loading a demo should not require overwrite confirmation because it should not touch the normal save slot.
+- Refreshing should not be treated as a reliable way to preserve the demo unless the DM explicitly saves or exports it.
+
+Reason:
+
+This makes the GitHub Pages version useful immediately and gives a fast way to test the UI.
+
+## 2. Demo Save Conversion
+
+Status: Follow-Up to Demo Mode
+
+Goal:
+
+Decide what happens if the DM clicks `Save` while in demo mode.
+
+Recommended behavior:
+
+- Prompt: `Save this demo voyage as your current saved voyage?`
+- If confirmed, write to the normal save slot.
+- Clear `demoMode`.
+- Log that the demo was saved as a real voyage.
+- If cancelled, remain in demo mode and do not overwrite the current save.
+
+Reason:
+
+Demo mode should be safe by default but not a dead end.
+
+## 3. Starting Presets
 
 Status: Not Started
 
@@ -195,56 +247,38 @@ Allow the DM to choose from predefined starting configurations.
 
 Possible first presets:
 
-- Marrowwind Voyage
-- Open Sea Default
-- Short Demo Voyage
+- Marrowwind Voyage.
+- Open Sea Default.
+- Short Demo Voyage.
+- Damaged Ship Start.
+- Low-Supply Survival Start.
 
 Each preset could define:
 
-- default ship name
-- default crew size
-- default crew names
-- default crew traits
-- starting travel distance
-- starting water level
-- starting supplies
-- starting repair materials
-- starting Course Meter
-- scripted event table
-- Open Sea Event table
+- default ship name.
+- default crew size.
+- default crew names.
+- default crew traits.
+- starting travel distance.
+- starting water level.
+- starting supplies.
+- starting repair materials.
+- starting Course Meter.
+- scripted event table.
+- Open Sea Event table.
 
 Keep this limited at first. Do not build custom event-table editing during the first preset pass.
 
-## Demo Mode
-
-Status: Not Started
-
-Goal:
-
-Add a safe demo voyage that lets someone try the tracker without understanding the full Marrowwind scenario.
-
-Possible behavior:
-
-- Demo button on landing screen
-- Shorter travel distance
-- preconfigured ship and crew
-- known example starting state
-- maybe one or two scripted moments
-
-Reason:
-
-A demo mode would make the project easier to show, test, and eventually publish.
-
-## Setup Polish
+## 4. Setup Polish
 
 Status: Not Started
 
 Possible improvements:
 
-- clearer setup validation messages
-- better visual grouping of background/proficiency traits
-- short help text explaining which traits affect which actions
-- optional collapse/expand for advanced fields
+- clearer setup validation messages.
+- better visual grouping of background/proficiency traits.
+- short help text explaining which traits affect which actions.
+- optional collapse/expand for advanced fields.
 
 Do not add advanced mechanical setup yet unless presets require it.
 
@@ -254,7 +288,7 @@ Do not add advanced mechanical setup yet unless presets require it.
 
 The current Open Sea Event system works, but it is still tied closely to the current voyage implementation.
 
-## Move Open Sea Events Into Table Data
+## 1. Move Open Sea Events Into Table Data
 
 Status: Not Started
 
@@ -264,20 +298,20 @@ Represent Open Sea Events as structured data rather than hardcoded control flow 
 
 Possible event data fields:
 
-- roll range
-- event name
-- DM-facing description
-- player-facing description, if needed
-- whether the event requires confirmation
-- whether the event creates prompts
-- whether the event modifies state
-- whether the event blocks normal turn flow
+- roll range.
+- event name.
+- DM-facing description.
+- player-facing description, if needed.
+- whether the event requires confirmation.
+- whether the event creates prompts.
+- whether the event modifies state.
+- whether the event blocks normal turn flow.
 
 Reason:
 
-This is the foundation for reusable event tables and future custom scenarios.
+This is the foundation for reusable event tables, presets, and future custom scenarios.
 
-## Built-In Event Table Selector
+## 2. Built-In Event Table Selector
 
 Status: Not Started
 
@@ -287,14 +321,14 @@ Allow the DM to choose a built-in event table during setup or preset selection.
 
 Possible built-in tables:
 
-- Marrowwind Open Sea
-- Generic Open Sea
-- Calm Coastal Waters
-- Stormy Waters
+- Marrowwind Open Sea.
+- Generic Open Sea.
+- Calm Coastal Waters.
+- Stormy Waters.
 
 Keep the first version simple. Do not build a custom event-table editor yet.
 
-## Custom Event Table Editor
+## 3. Custom Event Table Editor
 
 Status: Future
 
@@ -302,16 +336,14 @@ Goal:
 
 Allow a DM to define their own event table.
 
-This should wait until built-in event table data is stable.
-
 Possible future fields:
 
-- d20 range
-- event title
-- event text
-- mechanical tags
-- prompt creation
-- state effects
+- d20 range.
+- event title.
+- event text.
+- mechanical tags.
+- prompt creation.
+- state effects.
 
 This is likely a larger publishability feature, not a near-term cleanup task.
 
@@ -319,22 +351,88 @@ This is likely a larger publishability feature, not a near-term cleanup task.
 
 # Next Feature Phase: Player View and Presentation
 
-The player view works, but it can eventually become more visually useful at the table.
+The player view works. The next presentation work should make it clearer and more atmospheric without making the tracker distracting.
 
-## Player View Polish
+## 1. Time-of-Day Visual Themes
+
+Status: Not Started
+
+Goal:
+
+Change the player view's visual atmosphere based on the current time of day or voyage phase.
+
+Possible phases:
+
+- morning.
+- afternoon.
+- evening.
+- night.
+- storm or scripted crisis.
+
+Implementation direction:
+
+- Add a computed time phase to the published player state.
+- Add a class or data attribute to the player page, such as `data-time-phase="night"`.
+- Use CSS to adjust background, panel glow, and accent colors.
+- Keep DM screen styling mostly stable.
+
+Reason:
+
+This creates a visual sense of passage and helps the player view feel more alive.
+
+## 2. Turn-Advance Overlay
+
+Status: Not Started
+
+Goal:
+
+When the DM advances the turn, the player view should briefly show that time has passed.
+
+Possible behavior:
+
+- Show a short overlay on the player view.
+- Display something like `Day 1, Turn 1 → Day 1, Turn 2`.
+- Optionally include a simple clock/wheel animation.
+- Keep the overlay short and non-blocking.
+- Do not cover the DM screen with an animation.
+
+Implementation direction:
+
+- Publish previous and current turn labels or a `lastTurnAdvanceId`.
+- Let `player_view.js` detect turn changes and trigger the overlay.
+- Add `prefers-reduced-motion` support to reduce or skip animation.
+
+Reason:
+
+Turn advancement is currently functional but visually quiet. A short player-facing transition would improve table feel.
+
+## 3. Player View Polish
 
 Status: Not Started
 
 Possible improvements:
 
-- stronger ship-name header
-- clearer travel/water/supply grouping
-- better active-effects layout
-- improved crew status cards
-- more readable projection mode
-- small visual indicators for hidden vs known information
+- stronger ship-name header.
+- clearer travel/water/supply grouping.
+- better active-effects layout.
+- improved crew status cards.
+- more readable projection mode.
+- small visual indicators for hidden vs known information.
 
-## Ship Diagram
+## 4. Value-Change Feedback
+
+Status: Future
+
+Possible improvements:
+
+- subtle visual flash when water changes.
+- subtle visual flash when travel changes.
+- subtle visual flash when supplies change.
+- log emphasis for major turn results.
+
+Avoid heavy animations. The tracker should remain readable and stable.
+
+## 5. Ship Diagram
 
 Status: Future
 
@@ -344,27 +442,14 @@ Add a simple visual ship status diagram.
 
 Possible displayed systems:
 
-- mast
-- rudder
-- pump
-- leaks
-- water level
-- cargo hold threshold
+- mast.
+- rudder.
+- pump.
+- leaks.
+- water level.
+- cargo hold threshold.
 
-This should remain simple and should not block other usability work.
-
-## Value-Change Feedback
-
-Status: Future
-
-Possible improvements:
-
-- subtle visual flash when water changes
-- subtle visual flash when travel changes
-- subtle visual flash when supplies change
-- log emphasis for major turn results
-
-Avoid heavy animations. The tracker should remain readable and stable.
+This should remain simple and should not block more important usability work.
 
 ---
 
@@ -372,7 +457,7 @@ Avoid heavy animations. The tracker should remain readable and stable.
 
 The current save/export/import system works, but longer use would benefit from better save management.
 
-## Save Slots
+## 1. Save Slots
 
 Status: Not Started
 
@@ -382,16 +467,16 @@ Allow multiple browser saves instead of one current voyage.
 
 Possible behavior:
 
-- named save slots
-- save timestamp
-- ship name shown in slot list
-- resume selected slot
-- delete slot
-- export selected slot
+- named save slots.
+- save timestamp.
+- ship name shown in slot list.
+- resume selected slot.
+- delete slot.
+- export selected slot.
 
-This should wait until the current single-save setup flow is fully tested.
+This should wait until the current single-save setup flow and demo behavior are fully tested.
 
-## Structured Turn History
+## 2. Structured Turn History
 
 Status: Future
 
@@ -401,15 +486,15 @@ Improve the activity log into a clearer turn history.
 
 Possible behavior:
 
-- grouped by day/turn
-- actions confirmed
-- event rolled
-- checks resolved
-- water update
-- travel update
-- supplies update
+- grouped by day/turn.
+- actions confirmed.
+- event rolled.
+- checks resolved.
+- water update.
+- travel update.
+- supplies update.
 
-## Copy Recap Button
+## 3. Copy Recap Button
 
 Status: Future
 
@@ -419,9 +504,9 @@ Generate a short plain-text recap from the latest turn or session segment.
 
 Possible uses:
 
-- DM notes
-- Discord update
-- session recap drafting
+- DM notes.
+- Discord update.
+- session recap drafting.
 
 ---
 
@@ -451,41 +536,25 @@ This should not be built until the desired table behavior is clear.
 
 These tasks matter if the project moves from personal tool to public tool.
 
-## Rename Public Identity
+## 1. Rename Public Identity
 
 Status: Future
 
 Current identity:
 
-- Marrowwind Open Sea Tracker
+- Marrowwind Open Sea Tracker.
 
 Possible broader identity:
 
-- Open Sea Encounter Tracker
-- Open Sea Voyage Tracker
-- Dangerous Voyage Tracker
+- Open Sea Encounter Tracker.
+- Open Sea Voyage Tracker.
+- Dangerous Voyage Tracker.
 
 Reason:
 
 The current name is campaign-specific. A public tool should sound reusable.
 
-## GitHub Pages Deployment
-
-Status: Future
-
-Goal:
-
-Make the tracker available from a hosted GitHub Pages URL.
-
-Needs:
-
-- stable static file paths
-- no local-only assumptions
-- README deployment instructions
-- final favicon paths
-- hosted demo/testing pass
-
-## Scenario and Rules Documentation
+## 2. Scenario and Rules Documentation
 
 Status: Future
 
@@ -495,21 +564,50 @@ Document the rules enough that another DM can use the tracker without knowing th
 
 Possible docs:
 
-- basic voyage procedure
-- crew actions reference
-- water/flooding rules
-- travel/Course Meter rules
-- player knowledge rules
-- event table explanation
-- setup/preset explanation
+- basic voyage procedure.
+- crew actions reference.
+- water/flooding rules.
+- travel/Course Meter rules.
+- player knowledge rules.
+- event table explanation.
+- setup/preset explanation.
 
-## Legal/Product Cleanup
+## 3. Product Packaging and Demo Strategy
 
 Status: Future
 
-If the project becomes public or monetized, avoid official D&D branding, copied rules text, proprietary setting names, and non-original protected content.
+Goal:
 
-Keep the public framing as an original 5e-compatible encounter tool unless a different license path is chosen.
+Plan how a future purchasable version would differ from a free demo.
+
+Possible direction:
+
+- Free demo build includes Demo Mode only.
+- Full version unlocks setup, save, export/import, presets, and custom tables.
+- Demo build intentionally cannot save.
+- In a public demo, full-version buttons could be visible but disabled with purchase messaging.
+- Paid version should not rely only on disabled client-side buttons for real protection.
+
+Possible distribution models:
+
+- free public GitHub Pages demo plus paid download.
+- hosted paid version with account/license check.
+- separate demo build and full build.
+- desktop/package download through a storefront.
+
+This is a long-term product decision, not a near-term code task.
+
+## 4. Legal/Product Cleanup
+
+Status: Future
+
+If the project becomes public or monetized:
+
+- avoid official D&D branding.
+- avoid copied rules text.
+- avoid proprietary setting names.
+- avoid non-original protected content.
+- keep the public framing as an original 5e-compatible encounter tool unless a different license path is chosen.
 
 ---
 
@@ -517,17 +615,17 @@ Keep the public framing as an original 5e-compatible encounter tool unless a dif
 
 These are valid ideas, but they should not be built until the current roadmap items are more stable.
 
-- Full scenario builder
-- Custom action-list editor
-- Custom scripted-event editor
-- Custom flooding formula editor
-- Custom ship-system editor
-- Multiplayer/network sync
-- Account system
-- Cloud saves
-- Mobile-first rewrite
-- Framework rewrite
-- Full automated browser testing suite
+- Full scenario builder.
+- Custom action-list editor.
+- Custom scripted-event editor.
+- Custom flooding formula editor.
+- Custom ship-system editor.
+- Multiplayer/network sync.
+- Account system.
+- Cloud saves.
+- Mobile-first rewrite.
+- Framework rewrite.
+- Full automated browser testing suite.
 
 ---
 
@@ -535,17 +633,21 @@ These are valid ideas, but they should not be built until the current roadmap it
 
 Use this order unless a table need forces something else:
 
-1. Run the manual browser checklist.
+1. Finish focused manual browser testing.
 2. Fix any manual test failures.
-3. Add README screenshots.
-4. Clean up old scratch docs.
-5. Add demo mode or short demo voyage.
+3. Keep docs current as features and decisions change.
+4. Add temporary no-save Demo Mode.
+5. Add demo save-conversion behavior if needed.
 6. Add starting presets.
 7. Move Open Sea Events into structured table data.
 8. Add built-in event table selector.
-9. Improve player view presentation.
-10. Add save slots.
-11. Prepare for GitHub Pages deployment.
+9. Add player-view time-of-day visual themes.
+10. Add player-view turn-advance overlay.
+11. Improve player view layout/presentation.
+12. Add save slots.
+13. Improve structured turn history.
+14. Add scenario/rules documentation.
+15. Plan product packaging and public identity.
 
 ---
 
