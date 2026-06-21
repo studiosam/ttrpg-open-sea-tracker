@@ -13,21 +13,29 @@ const trackerFiles = [
   'tracker_persistence.js'
 ];
 
-function readProjectFile(filePath){
+function readProjectFile(filePath) {
   return fs.readFileSync(path.join(repoRoot, filePath), 'utf8');
 }
 
-function createStorage(){
+function createStorage() {
   const values = new Map();
   return {
-    setItem(key, value){ values.set(key, String(value)); },
-    getItem(key){ return values.has(key) ? values.get(key) : null; },
-    removeItem(key){ values.delete(key); },
-    clear(){ values.clear(); }
+    setItem(key, value) {
+      values.set(key, String(value));
+    },
+    getItem(key) {
+      return values.has(key) ? values.get(key) : null;
+    },
+    removeItem(key) {
+      values.delete(key);
+    },
+    clear() {
+      values.clear();
+    }
   };
 }
 
-function loadTrackerContext(){
+function loadTrackerContext() {
   const context = {
     console,
     structuredClone,
@@ -41,25 +49,29 @@ function loadTrackerContext(){
     Object,
     Set,
     Map,
-    localStorage:createStorage(),
-    sessionStorage:createStorage(),
-    alert(message){ throw new Error(`Unexpected alert: ${message}`); },
-    confirm(){ return true; }
+    localStorage: createStorage(),
+    sessionStorage: createStorage(),
+    alert(message) {
+      throw new Error(`Unexpected alert: ${message}`);
+    },
+    confirm() {
+      return true;
+    }
   };
   context.globalThis = context;
   vm.createContext(context);
-  trackerFiles.forEach(file => {
-    vm.runInContext(readProjectFile(file), context, {filename:file});
+  trackerFiles.forEach((file) => {
+    vm.runInContext(readProjectFile(file), context, { filename: file });
   });
   return {
     context,
-    evaluate(expression){
+    evaluate(expression) {
       return vm.runInContext(expression, context);
     }
   };
 }
 
-function loadPlayerContext(){
+function loadPlayerContext() {
   const context = {
     console,
     Date,
@@ -72,19 +84,28 @@ function loadPlayerContext(){
     Object,
     Set,
     Map,
-    localStorage:createStorage(),
-    document:{getElementById(){ return null; }},
-    window:{addEventListener(){}},
-    setInterval(){}
+    localStorage: createStorage(),
+    document: {
+      getElementById() {
+        return null;
+      }
+    },
+    window: { addEventListener() {} },
+    setInterval() {}
   };
   context.globalThis = context;
   vm.createContext(context);
-  vm.runInContext(readProjectFile('action_metadata.js'), context, {filename:'action_metadata.js'});
-  const playerSource = readProjectFile('player_view.js').replace(/\/\/ Storage events update this page[\s\S]*$/, '');
-  vm.runInContext(playerSource, context, {filename:'player_view.js'});
+  vm.runInContext(readProjectFile('action_metadata.js'), context, {
+    filename: 'action_metadata.js'
+  });
+  const playerSource = readProjectFile('player_view.js').replace(
+    /\/\/ Storage events update this page[\s\S]*$/,
+    ''
+  );
+  vm.runInContext(playerSource, context, { filename: 'player_view.js' });
   return {
     context,
-    evaluate(expression){
+    evaluate(expression) {
       return vm.runInContext(expression, context);
     }
   };
@@ -93,7 +114,7 @@ function loadPlayerContext(){
 test('browser validation suite passes under Node', () => {
   const tracker = loadTrackerContext();
   const results = tracker.evaluate('devValidationChecks()');
-  const failed = results.filter(result => !result.pass);
+  const failed = results.filter((result) => !result.pass);
   assert.equal(failed.length, 0, JSON.stringify(failed));
 });
 
@@ -282,15 +303,25 @@ test('DM controls use delegated handlers with full dispatcher coverage', () => {
   const combined = files.map(readProjectFile).join('\n');
   assert.equal(/on(?:click|change|input)=/.test(combined), false);
 
-  const clickActions = [...combined.matchAll(/data-action="([^"]+)"/g)].map(match => match[1]);
-  const changeActions = [...combined.matchAll(/data-change-action="([^"]+)"/g)].map(match => match[1]);
+  const clickActions = [...combined.matchAll(/data-action="([^"]+)"/g)].map((match) => match[1]);
+  const changeActions = [...combined.matchAll(/data-change-action="([^"]+)"/g)].map(
+    (match) => match[1]
+  );
   const gameplay = readProjectFile('tracker_gameplay.js');
 
-  [...new Set(clickActions)].forEach(action => {
-    assert.match(gameplay, new RegExp(`case '${action}'`), `Missing click dispatcher for ${action}`);
+  [...new Set(clickActions)].forEach((action) => {
+    assert.match(
+      gameplay,
+      new RegExp(`case '${action}'`),
+      `Missing click dispatcher for ${action}`
+    );
   });
-  [...new Set(changeActions)].forEach(action => {
-    assert.match(gameplay, new RegExp(`case '${action}'`), `Missing change dispatcher for ${action}`);
+  [...new Set(changeActions)].forEach((action) => {
+    assert.match(
+      gameplay,
+      new RegExp(`case '${action}'`),
+      `Missing change dispatcher for ${action}`
+    );
   });
 });
 

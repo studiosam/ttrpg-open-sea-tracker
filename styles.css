@@ -314,10 +314,7 @@ h3 {
 }
 .water-ingress-stack .score-metric {
   display: grid;
-  grid-template-columns: minmax(70px, 1.1fr) minmax(34px, 0.45fr) minmax(
-      58px,
-      0.8fr
-    );
+  grid-template-columns: minmax(70px, 1.1fr) minmax(34px, 0.45fr) minmax(58px, 0.8fr);
   gap: 4px;
   align-items: center;
   padding: 4px;
@@ -657,7 +654,7 @@ th:nth-child(4) {
   color: var(--muted);
   font-size: 11px;
 }
-.crew-setup-row input[type="text"] {
+.crew-setup-row input[type='text'] {
   height: 32px;
   min-height: 32px;
 }
@@ -730,8 +727,7 @@ th:nth-child(4) {
 }
 .scripted-check.scripted-alert {
   background:
-    linear-gradient(135deg, rgba(217, 174, 85, 0.18), rgba(223, 112, 66, 0.15)),
-    var(--field);
+    linear-gradient(135deg, rgba(217, 174, 85, 0.18), rgba(223, 112, 66, 0.15)), var(--field);
   border: 3px solid var(--warn);
   border-left: 12px solid var(--danger);
   border-radius: 12px;
@@ -885,11 +881,7 @@ th:nth-child(4) {
   white-space: pre-wrap;
 }
 .water-equation-card {
-  background: linear-gradient(
-    135deg,
-    rgba(18, 61, 85, 0.96),
-    rgba(10, 29, 41, 0.98)
-  );
+  background: linear-gradient(135deg, rgba(18, 61, 85, 0.96), rgba(10, 29, 41, 0.98));
   border: 1px solid var(--accent);
   border-radius: 10px;
   padding: 10px 12px;
@@ -1010,22 +1002,14 @@ th:nth-child(4) {
   height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(
-      circle at 18% 0%,
-      rgba(242, 213, 154, 0.08),
-      transparent 28%
-    ),
+    radial-gradient(circle at 18% 0%, rgba(242, 213, 154, 0.08), transparent 28%),
     linear-gradient(180deg, #071923 0%, #0b2631 52%, #1e261f 100%);
 }
 .player-view header {
   min-height: 64px;
   padding: 10px 18px;
   background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 244, 214, 0.035) 0 1px,
-      transparent 1px 52px
-    ),
+    repeating-linear-gradient(90deg, rgba(255, 244, 214, 0.035) 0 1px, transparent 1px 52px),
     linear-gradient(90deg, #6f4524 0%, #3f2617 52%, #7b522d 100%);
   border-bottom-color: var(--line);
 }
@@ -1042,10 +1026,7 @@ th:nth-child(4) {
 }
 .player-main {
   grid-template-columns: repeat(18, minmax(0, 1fr));
-  grid-template-rows: minmax(150px, 0.72fr) minmax(245px, 1.18fr) minmax(
-      205px,
-      1fr
-    );
+  grid-template-rows: minmax(150px, 0.72fr) minmax(245px, 1.18fr) minmax(205px, 1fr);
   height: calc(100vh - 64px);
   padding: 12px;
   gap: 12px;
@@ -1056,11 +1037,7 @@ th:nth-child(4) {
   overflow: hidden;
   border-color: rgba(183, 131, 67, 0.8);
   background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 244, 214, 0.035) 0 1px,
-      transparent 1px 44px
-    ),
+    repeating-linear-gradient(90deg, rgba(255, 244, 214, 0.035) 0 1px, transparent 1px 44px),
     linear-gradient(
       135deg,
       rgba(112, 69, 34, 0.96) 0%,
@@ -1154,9 +1131,7 @@ th:nth-child(4) {
   padding-left: 18px;
 }
 .player-crew-row {
-  background:
-    linear-gradient(180deg, rgba(255, 244, 214, 0.045), rgba(0, 0, 0, 0.1)),
-    var(--field);
+  background: linear-gradient(180deg, rgba(255, 244, 214, 0.045), rgba(0, 0, 0, 0.1)), var(--field);
   border: 1px solid rgba(183, 131, 67, 0.75);
   border-radius: 12px;
   padding: 10px 12px;
@@ -1255,8 +1230,7 @@ th:nth-child(4) {
 }
 .player-card {
   background:
-    linear-gradient(180deg, rgba(255, 244, 214, 0.045), rgba(0, 0, 0, 0.08)),
-    var(--field);
+    linear-gradient(180deg, rgba(255, 244, 214, 0.045), rgba(0, 0, 0, 0.08)), var(--field);
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px;
@@ -1321,11 +1295,7 @@ th:nth-child(4) {
   overflow: hidden;
   border: 2px solid var(--line);
   border-radius: 14px 14px 8px 8px;
-  background: linear-gradient(
-    180deg,
-    rgba(238, 246, 251, 0.06),
-    rgba(238, 246, 251, 0.015)
-  );
+  background: linear-gradient(180deg, rgba(238, 246, 251, 0.06), rgba(238, 246, 251, 0.015));
   box-shadow: inset 0 1px 0 rgba(255, 244, 214, 0.08);
 }
 .water-fill {
@@ -1333,11 +1303,7 @@ th:nth-child(4) {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
-    180deg,
-    rgba(130, 214, 255, 0.95) 0%,
-    rgba(19, 77, 145, 0.98) 100%
-  );
+  background: linear-gradient(180deg, rgba(130, 214, 255, 0.95) 0%, rgba(19, 77, 145, 0.98) 100%);
   transition: height 0.25s ease;
   z-index: 1;
 }
@@ -1431,11 +1397,7 @@ th:nth-child(4) {
 .turn-step.active {
   border-color: var(--accent);
   color: var(--text);
-  background: linear-gradient(
-    180deg,
-    rgba(18, 61, 85, 0.95),
-    rgba(10, 29, 41, 0.98)
-  );
+  background: linear-gradient(180deg, rgba(18, 61, 85, 0.95), rgba(10, 29, 41, 0.98));
   box-shadow: inset 0 0 0 1px rgba(91, 185, 232, 0.2);
 }
 .turn-step.done {
