@@ -1,76 +1,80 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Marrowwind Player View</title>
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body class="player-view">
-    <!-- Player-facing header shows only freshness/status, not DM controls. -->
-    <header>
-      <h1>Marrowwind Status</h1>
-      <div id="playerUpdated" class="score-turn">Waiting for DM tracker...</div>
-    </header>
-    <main class="player-main">
-      <!-- Top row: voyage position and travel estimate known to players. -->
-      <section class="panel player-hero player-panel-hero">
-        <div>
-          <h2>Voyage</h2>
-          <div id="playerTurn" class="player-turn-pair">
-            <div class="player-card player-turn-chip">
-              <div class="score-label">Day</div>
-              <div class="score-value">--</div>
-            </div>
-            <div class="player-card player-turn-chip">
-              <div class="score-label">Turn</div>
-              <div class="score-value">--</div>
-            </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marrowwind Player View</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+</head>
+
+<body class="player-view">
+  <!-- Player-facing header shows only freshness/status, not DM controls. -->
+  <header>
+    <h1>Marrowwind Status</h1>
+    <div id="playerUpdated" class="score-turn">Waiting for DM tracker...</div>
+  </header>
+  <main class="player-main">
+    <!-- Top row: voyage position and travel estimate known to players. -->
+    <section class="panel player-hero player-panel-hero">
+      <div>
+        <h2>Voyage</h2>
+        <div id="playerTurn" class="player-turn-pair">
+          <div class="player-card player-turn-chip">
+            <div class="score-label">Day</div>
+            <div class="score-value">--</div>
+          </div>
+          <div class="player-card player-turn-chip">
+            <div class="score-label">Turn</div>
+            <div class="score-value">--</div>
           </div>
         </div>
-        <div>
-          <h2>Travel Remaining</h2>
-          <div class="player-travel-pair">
-            <div id="playerTravel" class="player-card player-travel-card">
-              <div class="score-label">Days</div>
-              <div class="score-value">--</div>
-            </div>
-            <div id="playerCourseState" class="player-card player-course-card">
-              <div class="score-label">Course</div>
-              <div class="score-value">?</div>
-            </div>
+      </div>
+      <div>
+        <h2>Travel Remaining</h2>
+        <div class="player-travel-pair">
+          <div id="playerTravel" class="player-card player-travel-card">
+            <div class="score-label">Days</div>
+            <div class="score-value">--</div>
+          </div>
+          <div id="playerCourseState" class="player-card player-course-card">
+            <div class="score-label">Course</div>
+            <div class="score-value">?</div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- Ship-state panels show known or visibly obvious information only. -->
-      <section class="panel player-panel-ship">
-        <h2>Water Level</h2>
-        <div id="playerShipStats" class="player-card-grid"></div>
-      </section>
+    <!-- Ship-state panels show known or visibly obvious information only. -->
+    <section class="panel player-panel-ship">
+      <h2>Water Level</h2>
+      <div id="playerShipStats" class="player-card-grid"></div>
+    </section>
 
-      <section class="panel player-panel-supplies">
-        <h2>Supplies</h2>
-        <div id="playerSupplies" class="player-card-grid"></div>
-      </section>
+    <section class="panel player-panel-supplies">
+      <h2>Supplies</h2>
+      <div id="playerSupplies" class="player-card-grid"></div>
+    </section>
 
-      <section class="panel player-panel-systems">
-        <h2>Ship Systems</h2>
-        <div id="playerSystems" class="player-card-grid"></div>
-      </section>
+    <section class="panel player-panel-systems">
+      <h2>Ship Systems</h2>
+      <div id="playerSystems" class="player-card-grid"></div>
+    </section>
 
-      <!-- Current effects and crew status mirrored from the DM tracker. -->
-      <section class="panel player-panel-effects">
-        <h2>Active Effects</h2>
-        <div id="playerEffects" class="progress-list"></div>
-      </section>
+    <!-- Current effects and crew status mirrored from the DM tracker. -->
+    <section class="panel player-panel-effects">
+      <h2>Active Effects</h2>
+      <div id="playerEffects" class="progress-list"></div>
+    </section>
 
-      <section class="panel player-panel-crew">
-        <h2>Crew</h2>
-        <div id="playerCrew" class="player-crew-list"></div>
-      </section>
-    </main>
-    <script src="action_metadata.js"></script>
-    <script src="player_view.js"></script>
-  </body>
+    <section class="panel player-panel-crew">
+      <h2>Crew</h2>
+      <div id="playerCrew" class="player-crew-list"></div>
+    </section>
+  </main>
+  <script src="action_metadata.js"></script>
+  <script src="player_view.js"></script>
+</body>
+
 </html>
