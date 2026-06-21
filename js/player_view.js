@@ -352,18 +352,17 @@ function systemCard(label, status) {
 }
 
 function systemDisplayStatus(status, label = '') {
-  if (label === 'Rigging' && status === 'Broken') return 'Snapped';
   return (
     {
-      Working: 'OK',
-      Repaired: 'OK',
-      Ready: 'OK',
-      Intact: 'OK',
-      Broken: 'Broken',
-      Jammed: 'Jammed',
-      Tangled: 'Tangled'
+      Working: '✓',
+      Repaired: '✓',
+      Ready: '✓',
+      Intact: '✓',
+      Broken: '✕',
+      Jammed: '✕',
+      Tangled: '✕'
     }[status] ||
-    status ||
+    (status ? '✕' : '') ||
     '--'
   );
 }

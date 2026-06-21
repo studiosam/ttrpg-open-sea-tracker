@@ -1498,9 +1498,12 @@ th:nth-child(4) {
 }
 .player-panel-supplies .player-card-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  height: calc(100% - 36px);
 }
 .player-panel-systems .player-card-grid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  height: calc(100% - 36px);
 }
 .player-card {
   min-height: 0;
@@ -1523,15 +1526,18 @@ th:nth-child(4) {
   font-size: clamp(18px, 1.45vw, 27px);
 }
 .player-panel-systems .player-system-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 4px;
+  height: 100%;
 }
 .player-panel-systems .player-system-card .score-value {
-  font-size: clamp(13px, 0.9vw, 18px);
+  align-self: center;
+  font-size: clamp(28px, 2.5vw, 46px);
+  font-weight: 900;
+  justify-self: center;
   letter-spacing: 0;
-  line-height: 1.2;
+  line-height: 1.05;
   overflow: visible;
   overflow-wrap: normal;
   padding-bottom: 2px;

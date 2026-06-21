@@ -466,6 +466,37 @@ test('player active effects layout supports six wrapped cards', () => {
   assert.match(styles, /\.player-effect-detail\s*\{[\s\S]*overflow-wrap:\s*anywhere;/);
 });
 
+test('player ship systems use check and x symbols', () => {
+  const player = loadPlayerContext();
+  const result = player.evaluate(`({
+    mast: systemCard('Mast', 'Working'),
+    pump: systemCard('Pump', 'Jammed'),
+    rigging: systemCard('Rigging', 'Broken')
+  })`);
+  assert.match(result.mast, />✓<\/div>/);
+  assert.match(result.mast, /aria-label="Mast: Working"/);
+  assert.match(result.pump, />✕<\/div>/);
+  assert.match(result.pump, /aria-label="Pump: Jammed"/);
+  assert.match(result.rigging, />✕<\/div>/);
+  assert.match(result.rigging, /aria-label="Rigging: Broken"/);
+});
+
+test('player ship system cards stretch to top-row card height', () => {
+  const styles = readProjectFile('css/styles.css');
+  assert.match(
+    styles,
+    /\.player-panel-systems \.player-card-grid\s*\{[\s\S]*grid-template-rows:\s*minmax\(0,\s*1fr\);[\s\S]*height:\s*calc\(100% - 36px\);/
+  );
+  assert.match(
+    styles,
+    /\.player-panel-systems \.player-system-card\s*\{[\s\S]*display:\s*grid;[\s\S]*grid-template-rows:\s*auto minmax\(0,\s*1fr\);[\s\S]*height:\s*100%;/
+  );
+  assert.match(
+    styles,
+    /\.player-panel-systems \.player-system-card \.score-value\s*\{[\s\S]*align-self:\s*center;[\s\S]*justify-self:\s*center;/
+  );
+});
+
 test('idle shows dash for turns remaining', () => {
   const tracker = loadTrackerContext();
   const result = tracker.evaluate(`(() => {
