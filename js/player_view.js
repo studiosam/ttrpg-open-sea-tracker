@@ -1,5 +1,6 @@
 const PLAYER_STATE_KEY = 'openSeaPlayerState';
 const FULL_STATE_KEYS = ['openSeaTrackerDraft', 'openSeaTracker'];
+const DEFAULT_PLAYER_SHIP_NAME = 'The Marrowwind';
 const PLAYER_EFFECT_LABELS = {
   'Dense Fog': 'Dense Fog',
   'School of Fish': 'School of Fish',
@@ -45,6 +46,7 @@ function readPlayerState() {
 // Converts a full GM save into a player-safe shape for direct refresh/fallback loading.
 function publicStateFromFullState(state) {
   return {
+    shipName: playerShipName(state),
     day: state.day,
     turn: state.turn,
     travel: knownValueFromFullState(state, 'travel'),
@@ -277,6 +279,7 @@ function render() {
     renderEmpty();
     return;
   }
+  renderPlayerTitle(state);
   q('playerTurn').innerHTML = turnChips(state.day, state.turn);
   q('playerTravel').innerHTML = travelCardContent(state.travel);
   q('playerCourseState').className =
@@ -323,6 +326,7 @@ function render() {
 }
 
 function renderEmpty() {
+  renderPlayerTitle(null);
   q('playerTurn').innerHTML = turnChips('--', '--');
   q('playerTravel').innerHTML = travelCardContent(null);
   q('playerCourseState').className = 'player-card player-course-card unknown';
@@ -333,6 +337,16 @@ function renderEmpty() {
       q(id).innerHTML = '<span class="pill">Waiting for DM tracker...</span>';
     }
   );
+}
+
+function renderPlayerTitle(state) {
+  const title = q('playerTitle');
+  if (title) title.textContent = `${playerShipName(state)} Status`;
+}
+
+function playerShipName(state) {
+  const name = typeof state?.shipName === 'string' ? state.shipName.trim() : '';
+  return name || DEFAULT_PLAYER_SHIP_NAME;
 }
 
 function statCard(label, value, className = '') {

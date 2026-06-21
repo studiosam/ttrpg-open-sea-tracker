@@ -62,6 +62,7 @@ function saveState() {
 function exportState() {
   syncFromInputs();
   state.version = APP_VERSION;
+  state.shipName = normalizedShipName(state.shipName);
   const exportState = structuredClone(state);
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `marrowwind-tracker-day-${state.day}-turn-${state.turn}-${timestamp}.json`;
@@ -104,20 +105,65 @@ function enterTrackerMode() {
 }
 
 function startNewVoyage() {
-  if (
-    readSavedVoyageState() &&
-    !confirm('Start a new voyage? This will replace the saved voyage in this browser.')
-  ) {
-    return;
-  }
-  clearActionCommitSnapshot();
-  undoStack = [];
-  state = structuredClone(defaultState);
-  migrateState();
-  log('Started a new voyage.');
-  saveStateSnapshot();
-  enterTrackerMode();
+  setupDraft = defaultSetupDraft();
+  appMode = 'setup';
+  if (typeof document !== 'undefined') document.body?.classList.add('landing-active');
   render();
+}
+
+function backToLanding() {
+  appMode = 'landing';
+  render();
+}
+
+function resetSetupDefaults() {
+  setupDraft = defaultSetupDraft();
+  renderSetupScreen();
+}
+
+function startSetupVoyage() {
+  alert('Start Voyage will be enabled in the next setup stage.');
+}
+
+function ensureSetupDraft() {
+  setupDraft = setupDraftForRender();
+  return setupDraft;
+}
+
+function setSetupField(field, value) {
+  const draft = ensureSetupDraft();
+  if (field === 'shipName') draft.shipName = String(value ?? '');
+  if (field === 'voyagePreset') draft.voyagePreset = String(value ?? 'marrowwind');
+}
+
+function setSetupCrewName(index, value) {
+  const draft = ensureSetupDraft();
+  const character = draft.crew[Number(index)];
+  if (character) character.name = String(value ?? '');
+}
+
+function setSetupCrewSize(value) {
+  const draft = ensureSetupDraft();
+  const crewSize = clampSetupCrewSize(value);
+  const defaults = defaultSetupDraft();
+  draft.crewSize = crewSize;
+  draft.crew = Array.from({ length: crewSize }, (_, index) => {
+    const existing = draft.crew[index];
+    return existing || defaults.crew[index] || setupCrewDraftFromMember(defaultCrewMember(index));
+  });
+  renderSetupScreen();
+}
+
+function setSetupCrewTrait(index, field, checked) {
+  const draft = ensureSetupDraft();
+  const character = draft.crew[Number(index)];
+  if (character && SETUP_CREW_TRAIT_FIELDS.some((trait) => trait.field === field)) {
+    character[field] = Boolean(checked);
+  }
+}
+
+function setSetupCrewBackground(index, checked) {
+  setSetupCrewTrait(index, 'sailorPirateBackground', checked);
 }
 
 function resumeCurrentVoyage() {
@@ -239,6 +285,9 @@ function validateImportedStatePayload(importedState) {
   validateImportedTurnLedger(importedState.turnLedger, errors);
   validateImportedRestMealStatus(importedState.restMealStatus, errors);
   validateImportedStartedGroups(importedState.startedGroups, errors);
+  validateImportedText(importedState.shipName, 'Ship name', errors, {
+    maxLength: SHIP_NAME_MAX_LENGTH
+  });
   validateImportedBoolean(importedState.setupComplete, 'Setup complete flag', errors);
   if (errors.length) {
     throw new Error(`Import validation failed: ${errors.slice(0, 5).join(' ')}`);
@@ -274,6 +323,13 @@ function validateMigratedImportState(candidate) {
     candidate.crew.length > MAX_CREW_SIZE
   ) {
     errors.push(`Crew size must be between ${MIN_CREW_SIZE} and ${MAX_CREW_SIZE}.`);
+  }
+  if (
+    typeof candidate.shipName !== 'string' ||
+    !candidate.shipName.trim() ||
+    candidate.shipName.length > SHIP_NAME_MAX_LENGTH
+  ) {
+    errors.push('Ship name is invalid after migration.');
   }
   const actionIds = new Set(actions.map((action) => action.id));
   Object.values(candidate.plannedActions || {}).forEach((actionId) => {
@@ -647,6 +703,7 @@ function validateImportedStartedGroups(startedGroups, errors) {
 
 function saveStateSnapshot() {
   state.version = APP_VERSION;
+  state.shipName = normalizedShipName(state.shipName);
   syncTravelDaysFromTicks();
   localStorage.setItem('openSeaTracker', JSON.stringify(state));
 }
@@ -658,6 +715,7 @@ function publishPlayerState() {
   const snapshot = {
     version: APP_VERSION,
     updatedAt: Date.now(),
+    shipName: normalizedShipName(state.shipName),
     day: state.day,
     turn: state.turn,
     travel: playerKnownValue('travel'),
@@ -1252,6 +1310,7 @@ function migrateState() {
   state = { ...structuredClone(defaultState), ...incomingState };
   state.version = APP_VERSION;
   state.setupComplete = state.setupComplete !== false;
+  state.shipName = normalizedShipName(state.shipName);
   const parsedTravelTicks = Number(state.travelTicks);
   state.travelTicks =
     hadTravelTicks && Number.isFinite(parsedTravelTicks)
@@ -1360,6 +1419,7 @@ function log(message) {
 function fieldLabel(field) {
   const labels = {
     day: 'Day',
+    shipName: 'Ship Name',
     turn: 'Turn',
     travel: 'Travel Remaining',
     travelTicks: 'Travel Ticks',

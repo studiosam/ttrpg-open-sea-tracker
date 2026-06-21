@@ -132,6 +132,12 @@ test('browser validation suite restores the active tracker state', () => {
   assert.equal(result.turn, 3);
 });
 
+test('default tracker state has a ship name', () => {
+  const tracker = loadTrackerContext();
+  const shipName = tracker.evaluate('defaultState.shipName');
+  assert.equal(shipName, 'The Marrowwind');
+});
+
 test('import validation rejects malformed and unsafe payloads', () => {
   const tracker = loadTrackerContext();
   const result = tracker.evaluate(`(() => {
@@ -150,6 +156,26 @@ test('import validation rejects malformed and unsafe payloads', () => {
   assert.match(result[1], /tracker state object/);
   assert.match(result[2], /Unsafe key/);
   assert.match(result[3], /finite number/);
+});
+
+test('import validation rejects invalid ship names', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    const cases = [
+      {shipName: 42},
+      {shipName: 'x'.repeat(SHIP_NAME_MAX_LENGTH + 1)}
+    ];
+    return cases.map(payload => {
+      try {
+        validateImportedStatePayload(payload);
+        return 'accepted';
+      } catch (error) {
+        return error.message;
+      }
+    });
+  })()`);
+  assert.match(result[0], /Ship name must be text/);
+  assert.match(result[1], /Ship name is too long/);
 });
 
 test('pending prompt rendering escapes imported prompt text', () => {
@@ -270,15 +296,17 @@ test('import normalization migrates compatible old saves', () => {
       mastStatus: imported.mastStatus,
       rudderStatus: imported.rudderStatus,
       salvagedTimber: imported.salvagedTimber,
+      shipName: imported.shipName,
       crewSize: imported.crew.length
     };
   })()`);
-  assert.equal(result.version, 8);
+  assert.equal(result.version, 9);
   assert.equal(result.travelTicks, 38);
   assert.equal(result.travel, 4.75);
   assert.equal(result.mastStatus, 'Repaired');
   assert.equal(result.rudderStatus, 'Broken');
   assert.equal(result.salvagedTimber, 1);
+  assert.equal(result.shipName, 'The Marrowwind');
   assert.equal(result.crewSize, 6);
 });
 
@@ -321,32 +349,192 @@ test('old saves migrate as setup complete', () => {
   assert.equal(setupComplete, true);
 });
 
-test('starting a new voyage creates and saves default tracker state', () => {
+test('dm header renders the ship name', () => {
+  const tracker = loadTrackerContext();
+  const title = tracker.evaluate(`(() => {
+    const title = {textContent: ''};
+    document = { getElementById(id) { return id === 'trackerTitle' ? title : null; } };
+    state = structuredClone(defaultState);
+    state.shipName = ' The Tide Needle ';
+    renderShipName();
+    return title.textContent;
+  })()`);
+  assert.equal(title, 'The Tide Needle Tracker');
+});
+
+test('exported saves include normalized ship name', () => {
+  const tracker = loadTrackerContext();
+  const exportedShipName = tracker.evaluate(`(() => {
+    let exportedText = '';
+    syncFromInputs = () => {};
+    render = () => {};
+    Blob = function(parts) { exportedText = String(parts[0]); };
+    URL = { createObjectURL() { return 'blob:test'; }, revokeObjectURL() {} };
+    document = {
+      body: { appendChild() {} },
+      createElement() { return { click() {}, remove() {} }; }
+    };
+    state = structuredClone(defaultState);
+    state.shipName = ' The Tide Needle ';
+    exportState();
+    return JSON.parse(exportedText).shipName;
+  })()`);
+  assert.equal(exportedShipName, 'The Tide Needle');
+});
+
+test('starting a new voyage opens setup without overwriting saves', () => {
   const tracker = loadTrackerContext();
   const result = tracker.evaluate(`(() => {
     render = () => {};
     appMode = 'landing';
     state = structuredClone(defaultState);
     state.day = 7;
+    localStorage.setItem('openSeaTracker', JSON.stringify({...defaultState, day: 4, shipName: 'Saved Ship'}));
     startNewVoyage();
     const saved = JSON.parse(localStorage.getItem('openSeaTracker'));
     return {
       appMode,
       stateDay: state.day,
-      stateTurn: state.turn,
+      draftShipName: setupDraft.shipName,
+      draftCrewSize: setupDraft.crew.length,
       savedDay: saved.day,
-      savedTurn: saved.turn,
-      setupComplete: state.setupComplete,
-      log: state.log
+      savedShipName: saved.shipName
     };
   })()`);
-  assert.equal(result.appMode, 'tracker');
-  assert.equal(result.stateDay, 1);
-  assert.equal(result.stateTurn, 1);
-  assert.equal(result.savedDay, 1);
-  assert.equal(result.savedTurn, 1);
-  assert.equal(result.setupComplete, true);
-  assert.match(result.log, /Started a new voyage/);
+  assert.equal(result.appMode, 'setup');
+  assert.equal(result.stateDay, 7);
+  assert.equal(result.draftShipName, 'The Marrowwind');
+  assert.equal(result.draftCrewSize, 6);
+  assert.equal(result.savedDay, 4);
+  assert.equal(result.savedShipName, 'Saved Ship');
+});
+
+test('setup screen renders stage two defaults safely', () => {
+  const tracker = loadTrackerContext();
+  const markup = tracker.evaluate('setupScreenMarkup(defaultSetupDraft(), true)');
+
+  assert.match(markup, /Set Up New Voyage/);
+  assert.match(markup, /Voyage Preset/);
+  assert.match(markup, /value="The Marrowwind"/);
+  assert.match(markup, /Crew Size/);
+  [4, 5, 6, 7].forEach((size) =>
+    assert.match(
+      markup,
+      new RegExp(`<option value="${size}"${size === 6 ? ' selected' : ''}>${size} players`)
+    )
+  );
+  ['Leopold', 'Delilah', 'Toady', 'Xander', 'Grumbo', 'Tommy'].forEach((name) =>
+    assert.match(markup, new RegExp(`value="${name}"`))
+  );
+  assert.equal([...markup.matchAll(/data-change-action="set-setup-crew-name"/g)].length, 6);
+  [
+    'Sailor/Pirate',
+    'Fisherman',
+    'Water Vehicles',
+    'Navigator&#039;s Tools',
+    'Cartographer&#039;s Tools'
+  ].forEach((label) => assert.equal(markup.split(label).length - 1, 6));
+  assert.equal([...markup.matchAll(/data-change-action="set-setup-crew-trait"/g)].length, 30);
+  assert.equal(
+    [...markup.matchAll(/data-change-action="set-setup-crew-trait"[^>]* checked/g)].length,
+    2
+  );
+  assert.match(markup, /data-action="back-to-landing"/);
+  assert.match(markup, /data-action="reset-setup-defaults"/);
+  assert.match(markup, /data-action="start-setup-voyage" disabled/);
+  assert.match(markup, /will not replace it/);
+});
+
+test('setup crew size supports four through seven players', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    setupDraft = defaultSetupDraft();
+    let renderCount = 0;
+    renderSetupScreen = () => { renderCount += 1; };
+    setSetupCrewName(3, 'Quartermaster');
+    setSetupCrewTrait(3, 'fishermanBackground', true);
+    setSetupCrewSize(4);
+    const fourMarkup = setupScreenMarkup(setupDraftForRender(), false);
+    const afterFour = structuredClone(setupDraft);
+    setSetupCrewSize(7);
+    const sevenMarkup = setupScreenMarkup(setupDraftForRender(), false);
+    const afterSeven = structuredClone(setupDraft);
+    setSetupCrewSize(99);
+    return {
+      fourCrewRows: (fourMarkup.match(/data-change-action="set-setup-crew-name"/g) || []).length,
+      fourTraitRows: (fourMarkup.match(/data-change-action="set-setup-crew-trait"/g) || []).length,
+      fourSelected: fourMarkup.includes('<option value="4" selected>4 players'),
+      preservedName: afterFour.crew[3].name,
+      preservedTrait: afterFour.crew[3].fishermanBackground,
+      sevenCrewRows: (sevenMarkup.match(/data-change-action="set-setup-crew-name"/g) || []).length,
+      sevenTraitRows: (sevenMarkup.match(/data-change-action="set-setup-crew-trait"/g) || []).length,
+      sevenSelected: sevenMarkup.includes('<option value="7" selected>7 players'),
+      playerSeven: afterSeven.crew[6].name,
+      clampedSize: setupDraft.crewSize,
+      renderCount
+    };
+  })()`);
+
+  assert.equal(result.fourCrewRows, 4);
+  assert.equal(result.fourTraitRows, 20);
+  assert.equal(result.fourSelected, true);
+  assert.equal(result.preservedName, 'Quartermaster');
+  assert.equal(result.preservedTrait, true);
+  assert.equal(result.sevenCrewRows, 7);
+  assert.equal(result.sevenTraitRows, 35);
+  assert.equal(result.sevenSelected, true);
+  assert.equal(result.playerSeven, 'Player 7');
+  assert.equal(result.clampedSize, 7);
+  assert.equal(result.renderCount, 3);
+});
+
+test('setup back and reset stay in memory only', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    render = () => {};
+    renderSetupScreen = () => {};
+    appMode = 'setup';
+    localStorage.setItem('openSeaTracker', JSON.stringify({...defaultState, day: 5, shipName: 'Saved Ship'}));
+    setSetupField('shipName', 'Draft Ship');
+    setSetupCrewName(0, 'Mira');
+    setSetupCrewTrait(0, 'navigatorToolsProficiency', true);
+    setSetupCrewTrait(1, 'fishermanBackground', true);
+    setSetupCrewTrait(2, 'waterVehiclesProficiency', true);
+    setSetupCrewTrait(3, 'cartographerToolsProficiency', true);
+    const edited = structuredClone(setupDraft);
+    resetSetupDefaults();
+    const reset = structuredClone(setupDraft);
+    backToLanding();
+    const saved = JSON.parse(localStorage.getItem('openSeaTracker'));
+    return {
+      editedShipName: edited.shipName,
+      editedCrewName: edited.crew[0].name,
+      editedNavigator: edited.crew[0].navigatorToolsProficiency,
+      editedFisherman: edited.crew[1].fishermanBackground,
+      editedWaterVehicles: edited.crew[2].waterVehiclesProficiency,
+      editedCartographer: edited.crew[3].cartographerToolsProficiency,
+      resetShipName: reset.shipName,
+      resetCrewName: reset.crew[0].name,
+      resetNavigator: reset.crew[0].navigatorToolsProficiency,
+      appMode,
+      savedDay: saved.day,
+      savedShipName: saved.shipName,
+      published: localStorage.getItem(PLAYER_STATE_KEY)
+    };
+  })()`);
+  assert.equal(result.editedShipName, 'Draft Ship');
+  assert.equal(result.editedCrewName, 'Mira');
+  assert.equal(result.editedNavigator, true);
+  assert.equal(result.editedFisherman, true);
+  assert.equal(result.editedWaterVehicles, true);
+  assert.equal(result.editedCartographer, true);
+  assert.equal(result.resetShipName, 'The Marrowwind');
+  assert.equal(result.resetCrewName, 'Leopold');
+  assert.equal(result.resetNavigator, false);
+  assert.equal(result.appMode, 'landing');
+  assert.equal(result.savedDay, 5);
+  assert.equal(result.savedShipName, 'Saved Ship');
+  assert.equal(result.published, null);
 });
 
 test('DM controls use delegated handlers with full dispatcher coverage', () => {
@@ -384,6 +572,31 @@ test('player travel display rounds to half-day increments', () => {
     formatPlayerTravelDays(4.25)
   ]`);
   assert.deepEqual([...result], ['5.5', '6', '4.5']);
+});
+
+test('published player state includes ship name', () => {
+  const tracker = loadTrackerContext();
+  const shipName = tracker.evaluate(`(() => {
+    state = structuredClone(defaultState);
+    state.shipName = 'The Tide Needle';
+    publishPlayerState();
+    return JSON.parse(localStorage.getItem(PLAYER_STATE_KEY)).shipName;
+  })()`);
+  assert.equal(shipName, 'The Tide Needle');
+});
+
+test('player header renders ship name with old snapshot fallback', () => {
+  const player = loadPlayerContext();
+  const result = player.evaluate(`(() => {
+    const title = {textContent: ''};
+    document.getElementById = (id) => id === 'playerTitle' ? title : null;
+    renderPlayerTitle({shipName: 'The Tide Needle'});
+    const custom = title.textContent;
+    renderPlayerTitle({});
+    return {custom, fallback: title.textContent};
+  })()`);
+  assert.equal(result.custom, 'The Tide Needle Status');
+  assert.equal(result.fallback, 'The Marrowwind Status');
 });
 
 test('navigate reveals rounded travel remaining', () => {

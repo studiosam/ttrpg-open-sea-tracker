@@ -1,7 +1,9 @@
 // Shared tracker state, rule tables, and low-level rule helpers.
-const APP_VERSION = 8;
+const APP_VERSION = 9;
 const PLAYER_STATE_KEY = 'openSeaPlayerState';
 const ACTION_COMMIT_SNAPSHOT_KEY = 'openSeaActionCommitSnapshot';
+const DEFAULT_SHIP_NAME = 'The Marrowwind';
+const SHIP_NAME_MAX_LENGTH = 60;
 const TRAVEL_TICKS_PER_DAY = 8;
 const DEFAULT_TRAVEL_TICKS = 44;
 const DEFAULT_COURSE_METER = 12;
@@ -11,12 +13,20 @@ const MIN_CREW_SIZE = 4;
 const MAX_CREW_SIZE = 7;
 const crewNames = ['Leopold', 'Delilah', 'Toady', 'Xander', 'Grumbo', 'Tommy'];
 const defaultSailorPirateCrew = new Set(['Leopold', 'Toady']);
+const SETUP_CREW_TRAIT_FIELDS = [
+  { field: 'sailorPirateBackground', label: 'Sailor/Pirate' },
+  { field: 'fishermanBackground', label: 'Fisherman' },
+  { field: 'waterVehiclesProficiency', label: 'Water Vehicles' },
+  { field: 'navigatorToolsProficiency', label: "Navigator's Tools" },
+  { field: 'cartographerToolsProficiency', label: "Cartographer's Tools" }
+];
 
 // Canonical starting state for a new tracker session.
 // Migrations use this as a complete fallback when older saves are missing fields.
 const defaultState = {
   version: APP_VERSION,
   setupComplete: true,
+  shipName: DEFAULT_SHIP_NAME,
   day: 1,
   turn: 1,
   travelTicks: DEFAULT_TRAVEL_TICKS,
@@ -89,6 +99,7 @@ let state = structuredClone(defaultState);
 let undoStack = [];
 let actionCommitSnapshot = null;
 let appMode = 'landing';
+let setupDraft = defaultSetupDraft();
 
 // Undo is intentionally in-memory only. Saves and exports remain clean current-state snapshots.
 function pushUndo(label) {
@@ -430,6 +441,37 @@ function h(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
+}
+function normalizedShipName(value) {
+  const name = typeof value === 'string' ? value.trim() : '';
+  return name || DEFAULT_SHIP_NAME;
+}
+function defaultSetupDraft() {
+  return {
+    voyagePreset: 'marrowwind',
+    shipName: DEFAULT_SHIP_NAME,
+    crewSize: crewNames.length,
+    crew: crewNames.map((name, index) => setupCrewDraftFromMember(defaultCrewMember(index, name)))
+  };
+}
+function setupCrewSizeOptions() {
+  return Array.from(
+    { length: MAX_CREW_SIZE - MIN_CREW_SIZE + 1 },
+    (_, index) => MIN_CREW_SIZE + index
+  );
+}
+function clampSetupCrewSize(value) {
+  const size = Math.round(Number(value));
+  if (!Number.isFinite(size)) return crewNames.length;
+  return Math.min(MAX_CREW_SIZE, Math.max(MIN_CREW_SIZE, size));
+}
+function setupCrewDraftFromMember(member) {
+  return {
+    name: member.name,
+    ...Object.fromEntries(
+      SETUP_CREW_TRAIT_FIELDS.map(({ field }) => [field, Boolean(member[field])])
+    )
+  };
 }
 function defaultCrewName(index) {
   return crewNames[index] || `Player ${index + 1}`;

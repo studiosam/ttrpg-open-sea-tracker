@@ -1457,6 +1457,12 @@ function handleDelegatedClick(event) {
   switch (action) {
     case 'start-new-voyage':
       return startNewVoyage();
+    case 'back-to-landing':
+      return backToLanding();
+    case 'reset-setup-defaults':
+      return resetSetupDefaults();
+    case 'start-setup-voyage':
+      return startSetupVoyage();
     case 'resume-current-voyage':
       return resumeCurrentVoyage();
     case 'import-saved-voyage':
@@ -1554,6 +1560,14 @@ function handleDelegatedChange(event) {
   const action = control.dataset.changeAction;
   const index = Number(control.dataset.index || 0);
   switch (action) {
+    case 'set-setup-field':
+      return setSetupField(control.dataset.field, control.value);
+    case 'set-setup-crew-name':
+      return setSetupCrewName(index, control.value);
+    case 'set-setup-crew-size':
+      return setSetupCrewSize(control.value);
+    case 'set-setup-crew-trait':
+      return setSetupCrewTrait(index, control.dataset.field, control.checked);
     case 'rename-crew-member':
       return renameCrewMember(index, control.value);
     case 'set-crew-background':
