@@ -1281,32 +1281,32 @@ th:nth-child(4) {
   line-height: 1.25;
 }
 .player-hero {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  align-items: start;
-}
-.player-hero > div {
   display: block;
-  min-width: 0;
 }
 .player-hero h2 {
   white-space: nowrap;
 }
-.player-turn-pair {
+.player-voyage-card-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
   gap: 10px;
+  height: calc(100% - 44px);
 }
-.player-travel-pair {
-  display: grid;
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  gap: 10px;
+.player-turn-pair {
+  display: contents;
 }
 .player-turn-chip,
 .player-travel-card,
 .player-course-card {
   min-width: 0;
+}
+.player-voyage-card-grid .player-card,
+.player-panel-supplies .player-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 4px;
+  height: 100%;
 }
 .player-course-card .score-value {
   font-size: clamp(22px, 1.75vw, 32px);
@@ -1394,10 +1394,16 @@ th:nth-child(4) {
 .player-card.unknown .score-value {
   color: var(--muted);
 }
+.player-voyage-card-grid .score-value,
+.player-panel-supplies .score-value {
+  align-self: center;
+  justify-self: center;
+  text-align: center;
+}
 .player-course-card .score-value,
 .player-travel-card .score-value,
 .player-turn-chip .score-value {
-  text-align: left;
+  padding-bottom: 2px;
 }
 /* Player water meter fills from the bottom and marks major flooding breakpoints. */
 .water-meter-card {
@@ -1605,14 +1611,14 @@ th:nth-child(4) {
   grid-row: 3;
 }
 .player-hero {
-  gap: 10px;
-  align-items: stretch;
+  display: block;
 }
-.player-travel-pair {
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+.player-voyage-card-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  height: calc(100% - 36px);
 }
 .player-turn-pair,
-.player-travel-pair,
+.player-voyage-card-grid,
 .player-card-grid,
 .player-ship-substats {
   gap: 8px;
@@ -1857,11 +1863,9 @@ th:nth-child(4) {
   .system-grid {
     grid-template-columns: 1fr;
   }
-  .player-hero {
+  .player-voyage-card-grid {
     grid-template-columns: 1fr;
-  }
-  .player-travel-pair {
-    grid-template-columns: 1fr;
+    height: auto;
   }
   .water-meter {
     width: 100%;

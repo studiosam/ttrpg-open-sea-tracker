@@ -4,6 +4,7 @@ This checklist covers browser behavior that the automated Node tests do not full
 
 Use this checklist after changes that affect:
 
+- Landing/startup behavior
 - Rendering
 - Buttons or event handlers
 - Turn flow
@@ -29,6 +30,14 @@ npm run ci
 The command should pass formatting, syntax checks, and automated tests.
 
 Use the checkboxes while testing. If you mark items complete in VS Code, do not commit the checked-off version unless you intentionally want to save a test record. The repo version should normally stay blank.
+
+If Live Server reloads the app when you check boxes, make sure `.vscode/settings.json` ignores Markdown files:
+
+```json
+{
+  "liveServer.settings.ignoreFiles": ["**/*.md", "**/.git/**", "**/.vscode/**"]
+}
+```
 
 ---
 
@@ -97,33 +106,132 @@ Confirm:
 
 ---
 
-# 2. Landing Screen
+# 2. Landing Screen With No Existing Save
+
+This section checks the first-load experience when there is no saved voyage in this browser.
+
+Use a clean browser profile, clear localStorage for the site, or temporarily use a different browser if needed.
 
 Open `open_sea_tracker.html`.
 
 Confirm:
 
-- [ ] The landing screen appears before the DM tracker UI.
-- [ ] `Resume Current Voyage` is disabled if no save exists in this browser.
-- [ ] Opening the landing screen does not overwrite an existing saved voyage.
-- [ ] `Start a New Voyage` opens a valid tracker state.
-- [ ] `Resume Current Voyage` opens the saved tracker state when a save exists.
-- [ ] `Import Saved Voyage` opens the import file picker.
-- [ ] Normal tracker flow still works after leaving the landing screen.
+- [ ] The page loads instead of showing a blank screen.
+- [ ] The favicon appears in the browser tab.
+- [ ] The landing screen appears before the main tracker UI.
+- [ ] The landing screen title is visible.
+- [ ] The landing screen description explains the purpose of the tracker.
+- [ ] `Start a New Voyage` is visible and enabled.
+- [ ] `Resume Current Voyage` is visible but disabled or clearly unavailable.
+- [ ] The landing screen clearly indicates that no saved voyage was found in this browser.
+- [ ] `Import Saved Voyage` is visible and enabled.
+- [ ] `Load Demo Voyage` is either disabled, omitted, or clearly marked as not available yet.
+- [ ] The normal tracker UI is not visible underneath the landing screen.
+- [ ] The DevTools Console shows no serious console errors.
 
 ---
 
-# 3. DM Tracker Initial Load
+# 3. Start a New Voyage From Landing Screen
 
-From the landing screen, choose `Start a New Voyage` or `Resume Current Voyage`.
+From the landing screen:
 
-Do not expect action assignment controls to be visible yet. Those are checked later after the tracker reaches the action-assignment phase.
+- [ ] Click `Start a New Voyage`.
+- [ ] If a confirmation prompt appears, confirm it.
+- [ ] Confirm the app enters the normal DM tracker screen.
+- [ ] Confirm the tracker shows Day 1, Turn 1.
+- [ ] Confirm the main DM app layout is visible.
+- [ ] Confirm the current day and turn are visible.
+- [ ] Confirm the turn-flow area is visible.
+- [ ] Confirm the voyage or travel status area is visible.
+- [ ] Confirm the ship status area is visible.
+- [ ] Confirm the water or ingress status area is visible.
+- [ ] Confirm the supplies area is visible.
+- [ ] Confirm the crew section is visible.
+- [ ] Confirm the crew section lists the expected default characters.
+- [ ] Confirm the log or history area is visible.
+- [ ] Confirm the DevTools Console shows no serious console errors.
+
+On the player screen:
+
+- [ ] Open `player_view.html` in the same browser profile.
+- [ ] Confirm the player-facing layout is visible.
+- [ ] Confirm the player screen receives the newly published state.
+- [ ] Confirm player-hidden values remain hidden if they should not be known yet.
+
+---
+
+# 4. Resume Current Voyage From Landing Screen
+
+This section checks that the landing screen can resume an existing local save.
+
+First create a save:
+
+- [ ] Start a new voyage if one is not already active.
+- [ ] Make a visible change, such as advancing the turn or changing a system status.
+- [ ] Confirm the app saves the state.
+
+Then reload `open_sea_tracker.html`.
+
+On the landing screen:
+
+- [ ] Confirm `Resume Current Voyage` is visible and enabled.
+- [ ] Confirm the landing screen does not overwrite the saved voyage just by loading.
+- [ ] Click `Resume Current Voyage`.
+- [ ] Confirm the app enters the normal DM tracker screen.
+- [ ] Confirm the previously saved day, turn, crew, ship state, supplies, water, and log are restored.
+- [ ] Confirm the player screen updates after resume or updates after refresh.
+- [ ] Confirm the DevTools Console shows no serious console errors.
+
+---
+
+# 5. Import Saved Voyage From Landing Screen
+
+This section checks the landing screen import path.
+
+Valid import:
+
+- [ ] Export a valid tracker save.
+- [ ] Reload the DM page so the landing screen appears.
+- [ ] Click `Import Saved Voyage`.
+- [ ] Confirm the file picker opens.
+- [ ] Choose the exported JSON file.
+- [ ] Confirm the import succeeds.
+- [ ] Confirm the app exits the landing screen and enters the normal DM tracker.
+- [ ] Confirm the imported day, turn, crew, ship state, supplies, water, and log are restored.
+- [ ] Confirm the player screen updates after import.
+
+Invalid import:
+
+Create a temporary bad JSON file:
+
+```json
+{
+  "day": -1,
+  "turn": 1,
+  "crew": []
+}
+```
+
+Then:
+
+- [ ] Reload the DM page so the landing screen appears.
+- [ ] Click `Import Saved Voyage`.
+- [ ] Choose the bad JSON file.
+- [ ] Confirm the import is rejected.
+- [ ] Confirm an error message appears.
+- [ ] Confirm the app does not corrupt the current saved voyage.
+- [ ] Confirm the app remains usable after the failed import.
+- [ ] Delete the temporary bad JSON file if it is no longer needed.
+
+---
+
+# 6. DM Screen Baseline After Entering Tracker Mode
+
+After starting, resuming, or importing a voyage, confirm the normal DM tracker is usable.
 
 Confirm:
 
-- [ ] The page loads instead of showing a blank screen.
-- [ ] The favicon appears in the browser tab.
-- [ ] The main DM app layout is visible.
+- [ ] The normal tracker UI appears instead of the landing screen.
 - [ ] The current day and turn are visible.
 - [ ] The turn-flow area is visible.
 - [ ] The voyage or travel status area is visible.
@@ -131,13 +239,14 @@ Confirm:
 - [ ] The water or ingress status area is visible.
 - [ ] The supplies area is visible.
 - [ ] The crew section is visible.
-- [ ] The crew section lists the expected characters, such as Leopold, Delilah, Toady, Xander, Grumbo, and Tommy.
+- [ ] The crew section lists the expected characters.
 - [ ] The log or history area is visible.
+- [ ] Action assignment controls are not required to be visible yet if the tracker has not reached the action-assignment phase.
 - [ ] The DevTools Console shows no serious console errors.
 
 ---
 
-# 4. Player Screen Initial Load
+# 7. Player Screen Initial Load
 
 Open `player_view.html` in the same browser profile.
 
@@ -158,7 +267,7 @@ The player screen does not need to show every DM value. Hidden player informatio
 
 ---
 
-# 5. Reset to a Known Baseline
+# 8. Reset to a Known Baseline
 
 On the DM screen:
 
@@ -193,7 +302,7 @@ On the player screen:
 
 ---
 
-# 6. Reach the Action-Assignment Phase
+# 9. Reach the Action-Assignment Phase
 
 This section checks that the normal turn flow can reach the point where crew actions are assigned.
 
@@ -217,7 +326,7 @@ At the action-assignment phase, confirm:
 
 ---
 
-# 7. Complete a Simple Idle Turn
+# 10. Complete a Simple Idle Turn
 
 This section confirms that the basic turn loop works without special actions.
 
@@ -242,9 +351,9 @@ On the player screen:
 
 ---
 
-# 8. Navigate Action Test
+# 11. Navigate Action Test
 
-This section checks the navigation prompt, DC display, Course Meter behavior, and player Course State / Travel Remaining reveal.
+This section checks the navigation prompt, DC display, Course Meter behavior, Course State reveal, and rounded Travel Remaining reveal.
 
 On the DM screen, proceed to an action-assignment phase.
 
@@ -264,14 +373,15 @@ Then:
 
 On the player screen:
 
-- [ ] Confirm Course State becomes visible if the Navigate result should reveal it.
+- [ ] Confirm Course State becomes visible after Navigate resolves.
 - [ ] Confirm the displayed Course State matches the DM result.
-- [ ] Confirm Travel Remaining becomes visible rounded to the nearest 0.5 day.
+- [ ] Confirm Travel Remaining becomes visible after Navigate resolves.
+- [ ] Confirm Travel Remaining is rounded for player display.
 - [ ] Confirm unrelated hidden values remain hidden.
 
 ---
 
-# 9. Helm Action Test
+# 12. Helm Action Test
 
 This section checks travel progress from the Helm action.
 
@@ -297,7 +407,7 @@ On the player screen:
 
 ---
 
-# 10. Broken Mast Helm Behavior
+# 13. Broken Mast Helm Behavior
 
 This section checks that the app handles a broken mast without creating a normal Helm check.
 
@@ -315,7 +425,7 @@ On the DM screen:
 
 ---
 
-# 11. Broken Rudder Helm Behavior
+# 14. Broken Rudder Helm Behavior
 
 This section checks that the app handles a broken rudder without creating a normal Helm check.
 
@@ -334,7 +444,7 @@ On the DM screen:
 
 ---
 
-# 12. Bilge Sounding Rod and Player Knowledge
+# 15. Bilge Sounding Rod and Player Knowledge
 
 This section checks water visibility and Total Ingress reveal behavior.
 
@@ -364,7 +474,7 @@ On the player screen:
 
 ---
 
-# 13. Group Action Test
+# 16. Group Action Test
 
 This section checks that multi-crew actions are handled correctly.
 
@@ -394,7 +504,7 @@ On the player screen:
 
 ---
 
-# 14. Water Formula Test
+# 17. Water Formula Test
 
 This section checks that the water formula applies once and logs clearly.
 
@@ -415,7 +525,7 @@ On the player screen:
 
 ---
 
-# 15. Supplies and Inventory Actions
+# 18. Supplies and Inventory Actions
 
 This section checks player reveal behavior for supplies.
 
@@ -450,7 +560,7 @@ On the player screen:
 
 ---
 
-# 16. Scripted Scene Turn
+# 19. Scripted Scene Turn
 
 This section checks that scripted scene turns interrupt normal turn flow safely.
 
@@ -458,8 +568,10 @@ On the DM screen:
 
 - [ ] Set the tracker to a scripted scene turn, such as Day 1 Turn 8.
 - [ ] Click `Check Scripted Events`.
-- [ ] Confirm the scripted event appears.
-- [ ] Confirm Open Sea Event rolling is blocked if the scripted event blocks it.
+- [ ] Confirm Sehanine's Storm appears as the scripted event.
+- [ ] Confirm the scripted event popup reminds the DM to describe the hull groaning under storm pressure.
+- [ ] Confirm the popup states that Minimum Water Ingress increases to at least 2.
+- [ ] Confirm Open Sea Event rolling is blocked for this turn.
 - [ ] Confirm the scripted event text displays cleanly.
 - [ ] Click `Force All Idle for Scene`.
 - [ ] Confirm all crew are forced to Idle.
@@ -476,7 +588,7 @@ On the player screen:
 
 ---
 
-# 17. Player View Sync
+# 20. Player View Sync
 
 This section checks that the DM page publishes state to the player page.
 
@@ -500,9 +612,9 @@ Expected behavior:
 
 ---
 
-# 18. Export and Valid Import
+# 21. Export and Valid Import From Tracker Mode
 
-This section checks that valid save files can be exported and restored.
+This section checks that valid save files can be exported and restored after the tracker is already open.
 
 On the DM screen:
 
@@ -517,9 +629,9 @@ On the DM screen:
 
 ---
 
-# 19. Invalid Import
+# 22. Invalid Import From Tracker Mode
 
-This section checks that bad save files are rejected without damaging the current state.
+This section checks that bad save files are rejected without damaging the current state after the tracker is already open.
 
 Create a temporary bad JSON file:
 
@@ -544,7 +656,7 @@ Delete the temporary bad JSON file after the test if you do not need it.
 
 ---
 
-# 20. Prompt Escaping
+# 23. Prompt Escaping
 
 This section only needs to be run after changes to import validation, pending prompt rendering, or prompt display.
 
@@ -568,11 +680,12 @@ Delete the temporary test file after the test if you do not need it.
 
 ---
 
-# 21. Layout Smoke Test
+# 24. Layout Smoke Test
 
 DM screen:
 
-- [ ] Confirm the main controls are usable at normal desktop width.
+- [ ] Confirm the landing screen is readable at normal desktop width.
+- [ ] Confirm the main tracker controls are usable at normal desktop width.
 - [ ] Confirm the turn-flow section is readable.
 - [ ] Confirm the ship status panels are readable.
 - [ ] Confirm the crew section is readable.
@@ -590,7 +703,7 @@ Player screen:
 
 ---
 
-# 22. Final Pass Before Commit
+# 25. Final Pass Before Commit
 
 Before committing a major change:
 
@@ -610,7 +723,6 @@ When new features are added, add short sections for them.
 
 Future checklist sections to add later:
 
-- Setup screen
 - Ship name setup
 - Crew setup
 - Starting presets

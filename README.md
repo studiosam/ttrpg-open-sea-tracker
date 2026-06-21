@@ -1,52 +1,231 @@
 # Marrowwind Open Sea Tracker
 
-A browser-based tracker for running the Marrowwind open sea voyage rules. The DM screen manages turn flow, actions, checks, water, supplies, ship systems, and hidden state. The player screen shows only player-facing information and updates automatically from the DM screen.
+A browser-based tracker for running dangerous open sea voyage rules.
 
-## Files
+The DM screen manages turn flow, actions, checks, water, supplies, ship systems, hidden state, saving, importing, and scripted events. The player screen shows only player-facing information and updates automatically from the DM screen.
+
+This project is currently built around the Marrowwind voyage, but the long-term goal is to move toward a more reusable open sea encounter tracker.
+
+---
+
+# Current Status
+
+This project is a working MVP.
+
+Current features include:
+
+- DM-facing tracker screen
+- Player-facing display screen
+- Startup landing screen
+- Resume current browser save
+- Import exported voyage saves
+- Turn-flow guidance
+- Open Sea Event handling
+- Scripted scene turns
+- Crew action assignment
+- Required checks and saves
+- Water ingress tracking
+- Course Meter and travel tracking
+- Player knowledge and hidden information
+- Save, load, export, import, reset, and undo
+- Input validation and import hardening
+- Automated test suite
+- GitHub Actions CI
+- Manual browser testing checklist
+
+---
+
+# Quick Start
+
+## DM Screen
+
+Open:
+
+```text
+open_sea_tracker.html
+```
+
+The DM screen now opens to a startup landing screen.
+
+Choose one of the startup actions:
+
+- **Start a New Voyage**: begins a new default voyage.
+- **Resume Current Voyage**: resumes the saved voyage stored in this browser.
+- **Import Saved Voyage**: imports a previously exported tracker `.json` file.
+
+If no saved voyage exists in the current browser profile, **Resume Current Voyage** should be unavailable.
+
+## Player Screen
+
+Open:
+
+```text
+player_view.html
+```
+
+Use this on a second monitor, projector, or player-facing browser window.
+
+Keep both pages in the same browser profile so they share `localStorage`. The player screen updates automatically as the DM tracker changes.
+
+No server or build step is required. The app can be opened directly in a browser or through a local development server such as VS Code Live Server.
+
+---
+
+# Recommended Screen Setup
+
+- Put `open_sea_tracker.html` on the DM/private monitor.
+- Put `player_view.html` fullscreen on the player-facing monitor.
+- Open both pages in the same browser profile.
+- If the player screen does not update, refresh `player_view.html` once after opening the DM tracker.
+
+---
+
+# Project Structure
+
+## Main Pages
 
 - `open_sea_tracker.html` - DM-facing tracker.
 - `player_view.html` - player-facing display for a second monitor.
-- `js/tracker_state.js` - shared DM tracker state, rule tables, and low-level rule helpers.
+
+## JavaScript
+
+- `js/action_metadata.js` - shared action definitions and action metadata.
+- `js/tracker_state.js` - shared DM tracker state, rule tables, scripted events, and low-level rule helpers.
 - `js/tracker_render.js` - DM screen rendering and UI view helpers.
-- `js/tracker_gameplay.js` - DM actions, prompts, turn flow, events, meals, and overtime handlers.
+- `js/tracker_gameplay.js` - DM actions, prompts, turn flow, event handlers, meals, and overtime handlers.
 - `js/tracker_persistence.js` - save/load, player-state publishing, validation, migration, and labels.
 - `js/tracker.js` - small DM tracker bootstrap loaded after the support scripts.
 - `js/player_view.js` - player screen rendering and sync logic.
+
+## Styling and Assets
+
 - `css/styles.css` - shared styling for both screens.
-- `tests/` - Node test suite for tracker rules, import validation, and event binding coverage.
-- `package.json` - npm script wrapper for the Node test suite.
+- `assets/favicon.svg` - app favicon.
+
+## Tests and Tooling
+
+- `tests/` - Node test suite for tracker rules, import validation, event binding coverage, player view behavior, and startup behavior.
+- `package.json` - npm scripts for formatting, syntax checks, CI, and tests.
+- `.github/workflows/ci.yml` - GitHub Actions workflow.
+- `.prettierrc` - Prettier formatting configuration.
+- `.prettierignore` - files ignored by Prettier.
+- `.vscode/settings.json` - workspace settings, including Live Server file-watch ignores.
+
+## Documentation
+
+- `docs/MANUAL_TESTING.md` - browser smoke-test checklist.
+- `docs/ROADMAP.md` - development roadmap.
 - `docs/design_document.txt` - system design notes and turn structure.
 - `docs/MarrowWindActions.txt` - current action reference.
 - `docs/CHANGELOG.md` - practical current-state history notes.
 
-## Quick Start
+---
 
-1. Open `open_sea_tracker.html` in a browser on the DM monitor.
-2. Open `player_view.html` in another tab or browser window on the player-facing monitor.
-3. Keep both pages in the same browser profile so they share `localStorage`.
-4. Run the game from the DM screen. The player screen updates automatically as the DM tracker changes.
+# Development Commands
 
-No server or build step is required.
+Run all standard checks:
 
-The DM tracker scripts are loaded as classic browser scripts from `js/` in dependency order. Keep `js/tracker_state.js`, `js/tracker_render.js`, `js/tracker_gameplay.js`, `js/tracker_persistence.js`, and `js/tracker.js` loaded in that order from `open_sea_tracker.html`. DM controls use delegated `data-action` and `data-change-action` handlers rather than inline event attributes.
+```sh
+npm run ci
+```
 
-## Testing
+This runs:
 
-Run the formal Node test suite from the project folder:
+```sh
+npm run format:check
+npm run check:syntax
+npm test
+```
+
+Run only the automated tests:
 
 ```sh
 npm test
 ```
 
-The tests load the browser scripts in a Node VM and check the tracker validation suite, delegated event-handler coverage, import validation, migration behavior, and key rule cases.
+Run Prettier formatting:
 
-## Recommended Screen Setup
+```sh
+npm run format
+```
 
-- Put `open_sea_tracker.html` on the DM/private monitor.
-- Put `player_view.html` fullscreen on the player-facing monitor.
-- If the player screen does not update, refresh `player_view.html` once after opening the DM tracker.
+Check formatting without changing files:
 
-## DM Turn Flow
+```sh
+npm run format:check
+```
+
+Run syntax checks:
+
+```sh
+npm run check:syntax
+```
+
+---
+
+# Testing
+
+The formal test suite loads the browser scripts in a Node VM and checks:
+
+- Browser validation suite behavior
+- State restoration after validation
+- Import validation
+- Import migration
+- Unsafe import rejection
+- Out-of-range import rejection
+- Malformed nested import rejection
+- Pending prompt escaping
+- Delegated event-handler coverage
+- Startup landing screen behavior
+- Old save migration
+- New voyage creation
+- Player travel rounding
+- Navigate reveal behavior
+- Water visibility behavior
+- Player effect rendering
+- Scripted scene behavior
+
+The browser behavior checklist is in:
+
+```text
+docs/MANUAL_TESTING.md
+```
+
+Run the manual checklist after changes that affect rendering, buttons, turn flow, player view publishing, import/export, localStorage, startup behavior, or major layout.
+
+---
+
+# Startup Landing Screen
+
+The DM page opens to a landing screen before entering the tracker.
+
+Startup actions:
+
+## Start a New Voyage
+
+Starts a fresh default voyage.
+
+If a saved voyage already exists, the app should confirm before replacing it.
+
+## Resume Current Voyage
+
+Loads the existing browser save from `localStorage`.
+
+This should not overwrite the saved voyage. It only reads and resumes the current save.
+
+## Import Saved Voyage
+
+Opens the import flow for a previously exported tracker `.json` file.
+
+The import uses validation and migration before replacing the current state.
+
+## Demo Mode
+
+Demo mode is planned but not part of the current core flow unless implemented in the app.
+
+---
+
+# DM Turn Flow
 
 Use the `Turn Flow` panel on the DM screen. It walks through the current turn in order:
 
@@ -60,27 +239,42 @@ Use the `Turn Flow` panel on the DM screen. It walks through the current turn in
 
 The visible DM panels change based on the current step so the screen only shows what is needed for that part of the turn.
 
-## Setting Crew Actions
+---
 
-- Use each character's action dropdown in the `Crew` panel.
+# Setting Crew Actions
+
+Use each character's action dropdown in the `Crew` panel.
+
+Important behavior:
+
 - Confirm characters individually when ready.
-- Confirming a character records intent. Labor changes, action starts, and required prompts are created when the tracker advances from `Set Actions` to `Checks`.
+- Confirming a character records intent.
+- Labor changes, action starts, and required prompts are created when the tracker advances from `Set Actions` to `Checks`.
 - Actions that require two players cannot be confirmed until the required participants are selected.
 - Ongoing multi-turn work is automatically selected on following turns.
 - Use `Clear` on a character row to clear that character's planned action.
 - Use `Set Unset to Idle` to quickly fill empty actions before advancing.
 
-## Checks, Saves, and Prompts
+---
+
+# Checks, Saves, and Prompts
 
 The `Required Checks` area displays prompts created by events, actions, labor thresholds, meals, rest, and water effects.
 
+Important behavior:
+
 - Resolve prompts before advancing past their turn-flow step.
-- Some prompts reveal information to the player screen when resolved successfully.
+- Some prompts reveal information to the player screen.
 - Manual prompts exist when the DM needs to apply a rule result outside the tracker.
+- Prompt text is escaped so imported text is displayed safely.
 
-## Scoreboard
+---
 
-The DM scoreboard stays visible while running turns. It shows key reference values such as:
+# Scoreboard
+
+The DM scoreboard stays visible while running turns.
+
+It shows key reference values such as:
 
 - Day and turn
 - Water level
@@ -95,54 +289,81 @@ The DM scoreboard stays visible while running turns. It shows key reference valu
 
 Most scoreboard values have manual `+` and `-` controls so the DM can override state when needed.
 
-## Water and Flooding
+---
+
+# Water and Flooding
 
 Water level is tracked on both screens.
 
+Player-facing water behavior:
+
 - The player screen shows a large water meter.
-- If water is below the cargo hold and the players have not checked the bilge sounding rod, the player screen shows that the level is safe but exact level is unknown.
+- If water is below the cargo hold and the players have not checked the bilge sounding rod, the player screen indicates that the bilge is not yet flooding without revealing the exact level.
 - Once water reaches the cargo hold, the player screen automatically shows the current level.
 - Flooding effects are shown on both screens when active.
-- Total ingress is revealed to players only after they know the current water level for two turns in a row.
+- Total ingress is revealed to players only when a rule reveals it, such as Bilge Sounding Rod success or repeated water-level knowledge.
 
-## Night Overtime
+DM-facing water behavior:
 
-At nighttime, the tracker checks dinner first, then the DM can either stop to rest or start Night Overtime.
+- Minimum ingress represents unavoidable water gain.
+- Active leaks increase total ingress.
+- Pumping and bucket actions can reduce water.
+- Water formula application is a specific turn-flow step.
+- The app prevents accidental repeated water updates during the same turn unless intentionally reset.
 
-- Use `Start Night Overtime` if the crew keeps working after the scheduled rest point.
-- Normal turns continue while Night Overtime is active.
-- Water still updates, actions still work, and Open Sea Events can still be rolled.
-- At the end of each overtime turn, characters with confirmed non-idle actions receive Constitution save prompts.
-- Failed overtime saves add visible Exhaustion and tracked overtime Exhaustion.
-- Use `End Night Overtime and Rest` when the crew finally stops.
-- Breakfast resolves overnight recovery: dinner + breakfast recovers 3 Labor and clears overtime Exhaustion; dinner only recovers 1 Labor and clears overtime Exhaustion; breakfast only recovers 2 Labor and clears 1 overtime Exhaustion; neither recovers 1 Labor and prompts Constitution saves starting at DC 15, +2 per consecutive day without meals, with no cap.
-- Standard day/night timing happens after Turn 8.
+---
 
-## Validation
+# Course Meter and Travel
 
-The formal validation path is `npm test`. The DM screen still includes a collapsed `Dev Validator` panel below the activity log for quick in-browser smoke checks during development. It uses the same validation checks for scripted turns, action durations, Course Meter ranges, travel tick conversion, Open Sea Event skips, wreckage availability, no-meal save DCs, and import validation without changing the current game state.
+Travel is stored internally as ticks:
 
-## Course Meter
+```text
+8 ticks = 1 day
+```
 
-Travel is stored internally as ticks: `8` ticks equals `1` day. The DM scoreboard shows exact travel ticks, Course Meter, and Course State. The player screen shows revealed travel as a readable value rounded to the nearest half day.
+The DM scoreboard shows exact travel ticks, Course Meter, and Course State.
 
-`Navigate / Study Map` adjusts the Course Meter and reveals the resulting Course State plus Travel Remaining rounded to the nearest half day whether the check succeeds or fails. If Navigate / Study Map resolves during a turn, the normal end-of-turn Course Meter decay is skipped for that turn. `Man Helm` applies one better Course State and improves Course on critical success, the current Course State on success, one worse Course State on failure, and one worse Course State plus `Course Meter -1` on critical failure. Fisherman background grants advantage on fishing checks.
+The player screen shows revealed travel as a readable value rounded to the nearest half day.
 
-## Player Knowledge
+`Navigate / Study Map` adjusts the Course Meter and reveals:
 
-Some player-facing values start unknown and display as `?` until learned in play.
+- Course State
+- Travel Remaining rounded to the nearest half day
+
+This reveal happens whether the check succeeds or fails.
+
+If Navigate / Study Map resolves during a turn, the normal end-of-turn Course Meter decay is skipped for that turn.
+
+`Man Helm` applies travel progress based on the current Course State:
+
+- Critical success applies one better Course State and improves Course Meter.
+- Success applies the current Course State.
+- Failure applies one worse Course State.
+- Critical failure applies one worse Course State and reduces Course Meter.
+
+Broken mast and broken rudder states change Helm behavior and prevent the normal Helm check.
+
+---
+
+# Player Knowledge
+
+Some player-facing values start unknown and display as hidden until learned in play.
 
 Players can learn values through actions such as:
 
-- `Navigate / Study Map` - corrects the Course Meter and reveals Course State plus rounded travel remaining.
+- `Navigate / Study Map` - reveals Course State and rounded Travel Remaining.
 - `Inventory Food` - reveals food.
 - `Inventory Water` - reveals fresh water.
 - `Inventory Repair Supplies` - reveals repair supplies.
-- `Examine Bilge Sounding Rod` - reveals water level. Success reveals total ingress immediately; total ingress can also become visible when water level is known two turns in a row.
+- `Examine Bilge Sounding Rod` - reveals water level. Success reveals total ingress immediately.
 
 The DM can also manually reveal or hide values from the scoreboard controls.
 
-## Player Screen
+The player screen should not show DM-only information such as Minimum Ingress.
+
+---
+
+# Player Screen
 
 The player screen displays:
 
@@ -153,51 +374,159 @@ The player screen displays:
 - Total ingress, if known
 - Supplies, if known
 - Ship systems
-- Crew labor, exhaustion, and most recent action
+- Crew labor, exhaustion, and current or most recent action
 - Active effects
 - Ongoing work
 
-The player screen does not show DM-only information such as minimum ingress.
+The player screen receives a filtered player-safe state from the DM tracker through browser `localStorage`.
 
-## Scripted Scene Turns
+---
 
-Use `Force All Idle for Scene` when a scripted encounter turn should be narrated and handled manually instead of resolving normal ship actions. This sets crew actions to Idle, removes normal action checks for the turn, pauses ongoing work, leaves scoreboard overrides available, and records the scene handling in the activity log.
+# Scripted Scene Turns
 
-## Saving and Refreshing
+Use `Force All Idle for Scene` when a scripted encounter turn should be narrated and handled manually instead of resolving normal ship actions.
+
+This action:
+
+- Sets crew actions to Idle
+- Removes normal action checks for the turn
+- Pauses ongoing work
+- Leaves scoreboard overrides available
+- Records the scene handling in the activity log
+
+Scripted events can also apply mechanical changes, such as increasing Minimum Water Ingress during Sehanine's Storm.
+
+---
+
+# Night Overtime
+
+At nighttime, the tracker checks dinner first. The DM can then either stop to rest or start Night Overtime.
+
+Important behavior:
+
+- Use `Start Night Overtime` if the crew keeps working after the scheduled rest point.
+- Normal turns continue while Night Overtime is active.
+- Water still updates.
+- Actions still work.
+- Open Sea Events can still be rolled.
+- At the end of each overtime turn, characters with confirmed non-idle actions receive Constitution save prompts.
+- Failed overtime saves add visible Exhaustion and tracked overtime Exhaustion.
+- Use `End Night Overtime and Rest` when the crew finally stops.
+
+Breakfast resolves overnight recovery:
+
+- Dinner + breakfast recovers 3 Labor and clears overtime Exhaustion.
+- Dinner only recovers 1 Labor and clears overtime Exhaustion.
+- Breakfast only recovers 2 Labor and clears 1 overtime Exhaustion.
+- Neither recovers 1 Labor and prompts Constitution saves starting at DC 15, +2 per consecutive day without meals, with no cap.
+
+Standard day/night timing happens after Turn 8.
+
+---
+
+# Saving, Loading, and Refreshing
 
 The tracker uses browser `localStorage`.
 
+Important behavior:
+
+- Use `Resume Current Voyage` on the landing screen to resume the saved browser state.
+- Use `Save` on the DM screen to manually save the full tracker state.
+- Use `Export` to download the current tracker state as a `.json` backup file.
+- Use `Import` or `Import Saved Voyage` to restore a previously exported `.json` backup file.
 - Use `Undo` to restore the state from before the last meaningful change.
 - The app keeps the 20 most recent undo snapshots for the current page session.
-- The DM state is saved automatically as phases advance.
-- Use `Save` on the DM screen to manually save the full tracker state.
-- Use `Load` to reload saved state.
-- Use `Export` to download the current tracker state as a `.json` backup file.
-- Use `Import` to restore a previously exported `.json` backup file.
 - Use `Reset` only when you want to start over.
 
-Important: saved data is tied to the browser profile and local files. If you switch browsers, clear site data, or use a private window, saved state may not be available.
+Important:
+
+Saved data is tied to the browser profile and local page/site data. If you switch browsers, clear site data, use a private window, or change how the page is hosted, saved state may not be available.
 
 Exported files go to the browser's normal download location, usually the Downloads folder unless your browser asks where to save each file.
-Import accepts JSON tracker-state objects up to 1 MB, validates the payload, migrates compatible older saves, rejects unsafe object keys, and validates the migrated state before replacing the current tracker state. `Undo` can restore the state from before the import during the same page session.
 
-## Activity Log
+Import accepts JSON tracker-state objects up to 1 MB, validates the payload, migrates compatible older saves, rejects unsafe object keys, and validates the migrated state before replacing the current tracker state.
 
-The activity log appears at the bottom of the DM page. It records human-readable events such as:
+`Undo` can restore the state from before the import during the same page session.
 
+---
+
+# Activity Log
+
+The activity log appears at the bottom of the DM page.
+
+It records human-readable events such as:
+
+- Startup/resume/import activity
 - Confirmed actions
 - Labor changes
 - Repairs completed
 - Supplies spent
 - Open Sea Events resolved
+- Scripted scene handling
 - Turn advancement
 
 Use it to audit what happened if you need to check whether something was already applied.
 
-## Troubleshooting
+---
 
-- Player screen is blank: open `open_sea_tracker.html` first, then refresh `player_view.html`.
-- Player screen is not updating: make sure both pages are open in the same browser profile.
-- Saved state is missing: check that the browser did not clear local site data.
-- Layout looks wrong: use a modern desktop browser and fullscreen the player view on a 16:9 display.
-- A rule result needs correction: use the DM scoreboard override controls and the activity log to document the correction.
+# Manual Browser Testing
+
+Use:
+
+```text
+docs/MANUAL_TESTING.md
+```
+
+The manual checklist covers browser behavior that the automated tests do not fully prove, including:
+
+- DM screen loading
+- Player screen loading
+- Startup landing screen behavior
+- Turn flow
+- Action assignment
+- Navigate reveal behavior
+- Helm behavior
+- Water visibility
+- Import/export
+- Invalid import rejection
+- Prompt escaping
+- Player view sync
+- Layout smoke testing
+
+---
+
+# Troubleshooting
+
+## Player screen is blank
+
+Open `open_sea_tracker.html` first, then refresh `player_view.html`.
+
+## Player screen is not updating
+
+Make sure both pages are open in the same browser profile.
+
+Refresh the player screen once if needed.
+
+## Resume Current Voyage is disabled
+
+No saved voyage was found in the current browser profile.
+
+Start a new voyage or import an exported save.
+
+## Saved state is missing
+
+The browser may have cleared local site data, or the page may be running under a different browser/profile/origin than before.
+
+Use exported `.json` backups to protect important saves.
+
+## Layout looks wrong
+
+Use a modern desktop browser and fullscreen the player view on a 16:9 display.
+
+## A rule result needs correction
+
+Use the DM scoreboard override controls and the activity log to document the correction.
+
+## Import fails
+
+Check that the file is a valid exported tracker `.json` file and is under the import size limit.

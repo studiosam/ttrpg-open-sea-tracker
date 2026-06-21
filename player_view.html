@@ -17,8 +17,8 @@
     <main class="player-main">
       <!-- Top row: voyage position and travel estimate known to players. -->
       <section class="panel player-hero player-panel-hero">
-        <div>
-          <h2>Voyage</h2>
+        <h2>Voyage</h2>
+        <div class="player-voyage-card-grid">
           <div id="playerTurn" class="player-turn-pair">
             <div class="player-card player-turn-chip">
               <div class="score-label">Day</div>
@@ -29,18 +29,13 @@
               <div class="score-value">--</div>
             </div>
           </div>
-        </div>
-        <div>
-          <h2>Travel Remaining</h2>
-          <div class="player-travel-pair">
-            <div id="playerTravel" class="player-card player-travel-card">
-              <div class="score-label">Days</div>
-              <div class="score-value">--</div>
-            </div>
-            <div id="playerCourseState" class="player-card player-course-card">
-              <div class="score-label">Course</div>
-              <div class="score-value">?</div>
-            </div>
+          <div id="playerTravel" class="player-card player-travel-card">
+            <div class="score-label">Days</div>
+            <div class="score-value">--</div>
+          </div>
+          <div id="playerCourseState" class="player-card player-course-card">
+            <div class="score-label">Course</div>
+            <div class="score-value">?</div>
           </div>
         </div>
       </section>

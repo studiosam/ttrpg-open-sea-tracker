@@ -548,6 +548,38 @@ test('player ship system cards stretch to top-row card height', () => {
   );
 });
 
+test('player voyage cards use the shared top-row card format', () => {
+  const playerView = readProjectFile('player_view.html');
+  const styles = readProjectFile('css/styles.css');
+
+  assert.doesNotMatch(playerView, /player-travel-pair/);
+  assert.match(
+    playerView,
+    /<section class="panel player-hero player-panel-hero">[\s\S]*<h2>Voyage<\/h2>[\s\S]*<div class="player-voyage-card-grid">[\s\S]*id="playerTurn"[\s\S]*id="playerTravel"[\s\S]*id="playerCourseState"/
+  );
+  assert.match(
+    styles,
+    /\.player-voyage-card-grid\s*\{[\s\S]*display:\s*grid;[\s\S]*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\);[\s\S]*grid-template-rows:\s*minmax\(0,\s*1fr\);[\s\S]*height:\s*calc\(100% - 44px\);/
+  );
+  assert.match(
+    styles,
+    /\.player-voyage-card-grid\s*\{[\s\S]*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\);[\s\S]*height:\s*calc\(100% - 36px\);/
+  );
+});
+
+test('player top-row values are centered like systems', () => {
+  const styles = readProjectFile('css/styles.css');
+
+  assert.match(
+    styles,
+    /\.player-voyage-card-grid \.player-card,\s*\.player-panel-supplies \.player-card\s*\{[\s\S]*display:\s*grid;[\s\S]*grid-template-rows:\s*auto minmax\(0,\s*1fr\);[\s\S]*height:\s*100%;/
+  );
+  assert.match(
+    styles,
+    /\.player-voyage-card-grid \.score-value,\s*\.player-panel-supplies \.score-value\s*\{[\s\S]*align-self:\s*center;[\s\S]*justify-self:\s*center;[\s\S]*text-align:\s*center;/
+  );
+});
+
 test('idle shows dash for turns remaining', () => {
   const tracker = loadTrackerContext();
   const result = tracker.evaluate(`(() => {
