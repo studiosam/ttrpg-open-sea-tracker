@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8" />
     <title>Open Sea Tracker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -9,172 +8,170 @@
     <link rel="canonical" href="open_sea_tracker.html" />
     <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
     <style>
-        :root {
-            --page-bg: #071923;
-            --panel-bg: #102d3c;
-            --panel-border: #2f6f8d;
-            --text-main: #f4fbff;
-            --text-muted: #b8d4df;
-            --accent: #5bb9e8;
-            --accent-dark: #1d6f92;
-            --accent-hover: #8fd4f2;
-            --accent-active: #d9ae55;
+      :root {
+        --page-bg: #071923;
+        --panel-bg: #102d3c;
+        --panel-border: #2f6f8d;
+        --text-main: #f4fbff;
+        --text-muted: #b8d4df;
+        --accent: #5bb9e8;
+        --accent-dark: #1d6f92;
+        --accent-hover: #8fd4f2;
+        --accent-active: #d9ae55;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .redirect-note a {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .redirect-note a:hover,
+      .redirect-note a:focus-visible {
+        color: var(--accent-hover);
+        outline: none;
+      }
+
+      .redirect-note a:active {
+        color: var(--accent-active);
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(91, 185, 232, 0.14), transparent 32rem),
+          var(--page-bg);
+        color: var(--text-main);
+      }
+
+      .redirect-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+
+      .redirect-card {
+        width: min(680px, 100%);
+        padding: 2rem;
+        border: 1px solid var(--panel-border);
+        border-radius: 18px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent), var(--panel-bg);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        text-align: center;
+      }
+
+      .redirect-icon-wrap {
+        width: 92px;
+        height: 92px;
+        margin: 0 auto 1.25rem;
+        display: grid;
+        place-items: center;
+        border-radius: 22px;
+        background: rgba(7, 25, 35, 0.8);
+        border: 1px solid rgba(91, 185, 232, 0.35);
+      }
+
+      .redirect-icon {
+        width: 68px;
+        height: 68px;
+        display: block;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.25rem);
+        line-height: 1.05;
+        letter-spacing: 0.02em;
+      }
+
+      .redirect-subtitle {
+        max-width: 520px;
+        margin: 1rem auto 0;
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        line-height: 1.55;
+      }
+
+      .redirect-note {
+        margin: 1.4rem 0 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+
+      .loading-bar {
+        width: min(360px, 100%);
+        height: 8px;
+        margin: 1.25rem auto 0;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(7, 25, 35, 0.85);
+        border: 1px solid rgba(91, 185, 232, 0.28);
+      }
+
+      .loading-bar::before {
+        content: '';
+        display: block;
+        width: 45%;
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--accent-dark), var(--accent));
+        animation: loading-slide 1.15s ease-in-out infinite alternate;
+      }
+
+      @keyframes loading-slide {
+        from {
+          transform: translateX(0);
         }
 
-        * {
-            box-sizing: border-box;
+        to {
+          transform: translateX(125%);
         }
+      }
 
-        .redirect-note a {
-            color: var(--accent);
-            font-weight: 700;
-        }
-
-        .redirect-note a:hover,
-        .redirect-note a:focus-visible {
-            color: var(--accent-hover);
-            outline: none;
-        }
-
-        .redirect-note a:active {
-            color: var(--accent-active);
-        }
-
-        body {
-            min-height: 100vh;
-            margin: 0;
-            font-family:
-                system-ui,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                sans-serif;
-            background:
-                radial-gradient(circle at top, rgba(91, 185, 232, 0.14), transparent 32rem),
-                var(--page-bg);
-            color: var(--text-main);
-        }
-
-        .redirect-page {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
+      @media (max-width: 520px) {
         .redirect-card {
-            width: min(680px, 100%);
-            padding: 2rem;
-            border: 1px solid var(--panel-border);
-            border-radius: 18px;
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent),
-                var(--panel-bg);
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-            text-align: center;
+          padding: 1.4rem;
         }
-
-        .redirect-icon-wrap {
-            width: 92px;
-            height: 92px;
-            margin: 0 auto 1.25rem;
-            display: grid;
-            place-items: center;
-            border-radius: 22px;
-            background: rgba(7, 25, 35, 0.8);
-            border: 1px solid rgba(91, 185, 232, 0.35);
-        }
-
-        .redirect-icon {
-            width: 68px;
-            height: 68px;
-            display: block;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: clamp(2rem, 4vw, 3.25rem);
-            line-height: 1.05;
-            letter-spacing: 0.02em;
-        }
-
-        .redirect-subtitle {
-            max-width: 520px;
-            margin: 1rem auto 0;
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            line-height: 1.55;
-        }
-
-        .redirect-note {
-            margin: 1.4rem 0 0;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .loading-bar {
-            width: min(360px, 100%);
-            height: 8px;
-            margin: 1.25rem auto 0;
-            overflow: hidden;
-            border-radius: 999px;
-            background: rgba(7, 25, 35, 0.85);
-            border: 1px solid rgba(91, 185, 232, 0.28);
-        }
-
-        .loading-bar::before {
-            content: "";
-            display: block;
-            width: 45%;
-            height: 100%;
-            border-radius: inherit;
-            background: linear-gradient(90deg, var(--accent-dark), var(--accent));
-            animation: loading-slide 1.15s ease-in-out infinite alternate;
-        }
-
-        @keyframes loading-slide {
-            from {
-                transform: translateX(0);
-            }
-
-            to {
-                transform: translateX(125%);
-            }
-        }
-
-        @media (max-width: 520px) {
-            .redirect-card {
-                padding: 1.4rem;
-            }
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <main class="redirect-page">
-        <section class="redirect-card" aria-labelledby="page-title">
-            <div class="redirect-icon-wrap">
-                <img class="redirect-icon" src="assets/favicon.svg" alt="" aria-hidden="true" />
-            </div>
+      <section class="redirect-card" aria-labelledby="page-title">
+        <div class="redirect-icon-wrap">
+          <img class="redirect-icon" src="assets/favicon.svg" alt="" aria-hidden="true" />
+        </div>
 
-            <h1 id="page-title">Open Sea Tracker</h1>
+        <h1 id="page-title">Open Sea Tracker</h1>
 
-            <p class="redirect-subtitle">
-                Preparing the DM tracker. Once it opens, use the tracker’s
-                <strong>Open Player View</strong> button when you are ready to show the
-                player-facing screen.
-            </p>
+        <p class="redirect-subtitle">
+          Preparing the DM tracker. Once it opens, use the tracker’s
+          <strong>Open Player View</strong> button when you are ready to show the player-facing
+          screen.
+        </p>
 
-            <div class="loading-bar" aria-hidden="true"></div>
+        <div class="loading-bar" aria-hidden="true"></div>
 
-            <p class="redirect-note">
-                Redirecting automatically. If nothing happens,
-                <a href="open_sea_tracker.html">open the DM tracker</a>.
-            </p>
-        </section>
+        <p class="redirect-note">
+          Redirecting automatically. If nothing happens,
+          <a href="open_sea_tracker.html">open the DM tracker</a>.
+        </p>
+      </section>
     </main>
-</body>
-
+  </body>
 </html>
 ```

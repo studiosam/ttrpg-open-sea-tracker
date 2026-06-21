@@ -339,8 +339,17 @@ test('landing screen exposes startup actions safely', () => {
   assert.match(result.noSave, /data-action="resume-current-voyage" disabled/);
   assert.match(result.noSave, /No saved voyage found in this browser/);
   assert.match(result.noSave, /data-action="import-saved-voyage"/);
+  assert.doesNotMatch(result.noSave, /Open Player View/);
   assert.doesNotMatch(result.withSave, /data-action="resume-current-voyage" disabled/);
   assert.match(result.withSave, /A saved voyage is available in this browser/);
+});
+
+test('dm tracker header exposes player view link', () => {
+  const html = readProjectFile('open_sea_tracker.html');
+  assert.match(html, /Open Player View/);
+  assert.match(html, /href="player_view\.html"/);
+  assert.match(html, /target="_blank"/);
+  assert.match(html, /rel="noopener"/);
 });
 
 test('old saves migrate as setup complete', () => {

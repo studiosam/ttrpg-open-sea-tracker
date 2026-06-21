@@ -113,8 +113,12 @@ body {
   gap: 8px;
   min-height: 128px;
   padding: 20px;
+  border: 1px solid var(--line);
   text-align: left;
+  text-decoration: none;
   border-radius: 18px;
+  color: inherit;
+  cursor: pointer;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent), rgba(22, 56, 76, 0.92);
   transition:
@@ -705,11 +709,14 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus,
-button:focus-visible {
+button:focus-visible,
+a.button-link:focus-visible,
+a.landing-action-button:focus-visible {
   outline: 2px solid rgba(127, 199, 255, 0.55);
   outline-offset: 2px;
 }
-button {
+button,
+.button-link {
   background: var(--panel2);
   color: var(--text);
   border: 1px solid var(--line);
@@ -717,8 +724,10 @@ button {
   padding: 8px 10px;
   cursor: pointer;
   font-weight: 600;
+  text-decoration: none;
 }
-button:hover:not(:disabled) {
+button:hover:not(:disabled),
+.button-link:hover {
   border-color: var(--accent);
 }
 button.primary {
