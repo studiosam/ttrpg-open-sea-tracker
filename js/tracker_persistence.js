@@ -25,6 +25,7 @@ const IMPORT_OBJECT_FIELDS = [
   'waterKnowledge',
   'plannedActions',
   'confirmedActions',
+  'salvageLumberBelowDeck',
   'consumedMeals',
   'appliedScriptedEvents',
   'restMealStatus',
@@ -440,17 +441,25 @@ function validateImportedCrewPayload(crew, errors) {
 }
 
 function validateImportedObjectMaps(importedState, errors) {
-  ['plannedActions', 'confirmedActions', 'overtimeExhaustion'].forEach((field) => {
-    const map = importedState[field];
-    if (!isPlainImportObject(map)) return;
-    Object.entries(map).forEach(([key, value]) => {
-      if (typeof key !== 'string') errors.push(`${fieldLabel(field)} contains a non-text key.`);
-      if (field === 'overtimeExhaustion' && !isFiniteNumericImportValue(value))
-        errors.push(`${fieldLabel(field)} value for ${key} must be numeric.`);
-      if (field !== 'overtimeExhaustion' && typeof value !== 'string')
-        errors.push(`${fieldLabel(field)} value for ${key} must be an action id.`);
-    });
-  });
+  ['plannedActions', 'confirmedActions', 'salvageLumberBelowDeck', 'overtimeExhaustion'].forEach(
+    (field) => {
+      const map = importedState[field];
+      if (!isPlainImportObject(map)) return;
+      Object.entries(map).forEach(([key, value]) => {
+        if (typeof key !== 'string') errors.push(`${fieldLabel(field)} contains a non-text key.`);
+        if (field === 'overtimeExhaustion' && !isFiniteNumericImportValue(value))
+          errors.push(`${fieldLabel(field)} value for ${key} must be numeric.`);
+        if (field === 'salvageLumberBelowDeck' && typeof value !== 'boolean')
+          errors.push(`${fieldLabel(field)} value for ${key} must be true or false.`);
+        if (
+          field !== 'overtimeExhaustion' &&
+          field !== 'salvageLumberBelowDeck' &&
+          typeof value !== 'string'
+        )
+          errors.push(`${fieldLabel(field)} value for ${key} must be an action id.`);
+      });
+    }
+  );
 }
 
 function validateImportedKnowledgePayloads(importedState, errors) {
@@ -1318,6 +1327,10 @@ function migrateState() {
   state.ongoing = Array.isArray(state.ongoing) ? state.ongoing : [];
   state.plannedActions = state.plannedActions || {};
   state.confirmedActions = state.confirmedActions || {};
+  state.salvageLumberBelowDeck =
+    state.salvageLumberBelowDeck && typeof state.salvageLumberBelowDeck === 'object'
+      ? state.salvageLumberBelowDeck
+      : {};
   state.isNightOvertime = Boolean(state.isNightOvertime);
   state.overtimeTurnCount = Math.max(0, Number(state.overtimeTurnCount || 0));
   state.overtimeExhaustion =
@@ -1378,6 +1391,7 @@ function fieldLabel(field) {
     riggingStatus: 'Rigging',
     pumping: 'Pumping',
     buckets: 'Bucket Brigade',
+    salvageLumberBelowDeck: 'Salvage lumber deck choices',
     labor: 'Labor',
     exhaustion: 'Exhaustion',
     fishermanBackground: 'Fisherman background',

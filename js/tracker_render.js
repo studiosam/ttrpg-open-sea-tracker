@@ -268,7 +268,8 @@ function voyageScoreCard() {
         controls:
           scoreMiniControls('courseMeter', 1) +
           metricKnowledgeControls('courseState', 'Reveal Course'),
-        detail: courseState.name
+        detail: courseState.name,
+        className: 'course-state-score-metric'
       }
     ],
     footer: { title: courseState.name, summary: detail }
@@ -874,15 +875,17 @@ function renderCrew() {
     const confirmed = state.confirmedActions[c.name] ? 'Confirmed' : 'Confirm';
     const confirmDisabled = canConfirmAction(c.name) ? '' : ' disabled';
     const groupHelp = groupHelpText(c.name);
+    const deckChoice = salvageLumberDeckChoiceControl(c.name, i, planned, locked);
     const tr = document.createElement('tr');
     tr.className = 'crewrow';
     tr.innerHTML = `<td>${h(c.name)}</td>
       <td>
         <select class="action-select" data-change-action="set-planned-action" data-index="${i}"${locked ? ' disabled' : ''}>
           <option value="">Choose action...</option>
-          ${options}
+        ${options}
         </select>
         ${locked ? `<span class="pill warn">${state.confirmedActions[c.name] ? 'locked' : 'auto'}</span>` : ''}
+        ${deckChoice}
         ${groupHelp ? `<div class="small">${h(groupHelp)}</div>` : ''}
       </td>
       <td>
@@ -912,6 +915,16 @@ function renderCrew() {
   renderPlanSummary();
 }
 
+function salvageLumberDeckChoiceControl(name, index, plannedAction, locked) {
+  if (plannedAction !== 'salvageLumber') return '';
+  const checked = state.salvageLumberBelowDeck?.[name] ? ' checked' : '';
+  const disabled = locked ? ' disabled' : '';
+  return `<label class="small action-option-toggle">
+    <input type="checkbox" data-change-action="set-salvage-lumber-deck" data-index="${index}"${checked}${disabled} />
+    Below deck salvage (unchecked = above deck)
+  </label>`;
+}
+
 function characterTurnsRemaining(name) {
   const ongoing = state.ongoing.find(
     (item) => item.status === 'active' && item.actors.includes(name)
@@ -919,7 +932,7 @@ function characterTurnsRemaining(name) {
   if (ongoing) return String(Number(ongoing.remaining || 1));
   const action = actionById(state.confirmedActions[name]);
   if (action?.id === 'idle') return '-';
-  if (action) return String(actionDuration(action));
+  if (action) return String(actionDuration(action, name));
   return '-';
 }
 
@@ -930,7 +943,7 @@ function characterDoneInStatus(name) {
   if (ongoing) return 'normal';
   const action = actionById(state.confirmedActions[name]);
   if (action?.id === 'idle') return '';
-  if (action && belowDeckDurationPenalty(action) > 0) return 'flooded';
+  if (action && belowDeckDurationPenalty(action, name) > 0) return 'flooded';
   return action ? 'normal' : '';
 }
 
@@ -947,6 +960,7 @@ function isActionDropdownAvailable(name, action) {
   if (state.confirmedActions[name] === action.id) return true;
   if (isLockedGroupMember(action.id, name)) return true;
   if (actionRequirementProblem(action)) return false;
+  if (wouldViolateRepairMaterialCapacity(name, action)) return false;
   if (wouldViolateOncePerTurn(name, action.id)) return false;
   if (wouldViolateGroupCapacity(name, action)) return false;
   return true;
@@ -984,6 +998,43 @@ function selectedByOthers(name, actionIds) {
   return state.crew.filter(
     (crew) => crew.name !== name && actionIds.includes(state.plannedActions[crew.name])
   ).length;
+}
+
+function wouldViolateRepairMaterialCapacity(name, action) {
+  if (!action?.repairCost) return false;
+  if (action.id === 'repairLeak') {
+    const maxRepairers = availableRepairMaterials() * action.groupSize;
+    return maxRepairers <= 0 || selectedByOthers(name, ['repairLeak']) >= maxRepairers;
+  }
+  return plannedRepairMaterialCost(name, action.id) > availableRepairMaterials();
+}
+
+function plannedRepairMaterialCost(candidateName = '', candidateActionId = null) {
+  const actionActors = new Map();
+  state.crew.forEach((character) => {
+    const actionId =
+      character.name === candidateName ? candidateActionId : state.plannedActions[character.name];
+    const action = actionById(actionId);
+    if (!action?.repairCost) return;
+    if (!actionActors.has(action.id)) actionActors.set(action.id, []);
+    actionActors.get(action.id).push(character.name);
+  });
+  return [...actionActors.entries()].reduce((total, [actionId, actors]) => {
+    const action = actionById(actionId);
+    return total + plannedRepairMaterialCostForAction(action, actors);
+  }, 0);
+}
+
+function plannedRepairMaterialCostForAction(action, actors) {
+  if (!action?.repairCost || !actors.length) return 0;
+  if (action.id === 'repairLeak') return Math.ceil(actors.length / action.groupSize);
+  if (action.groupSize || action.sharedStart || action.deferComplete) {
+    return Number(valueOfRepairCost(action.repairCost, actors)) || 0;
+  }
+  return actors.reduce(
+    (total, actor) => total + (Number(valueOfRepairCost(action.repairCost, [actor])) || 0),
+    0
+  );
 }
 
 // If state changes make a pending choice illegal, remove it before rendering the dropdown.
@@ -1062,6 +1113,7 @@ function actionPlanProblems() {
   addOncePerTurnProblems(problems);
   addGroupedActionProblems(problems);
   addRepairLeakProblems(problems);
+  addRepairMaterialPlanProblems(problems);
   return problems;
 }
 
@@ -1134,6 +1186,25 @@ function addRepairLeakProblems(problems) {
       `Only ${activeLeaks} active leak${activeLeaks === 1 ? '' : 's'} can be repaired this turn. Assign at most ${activeLeaks * 2} repair crew members.`
     );
   }
+}
+
+function addRepairMaterialPlanProblems(problems) {
+  const repairActionIds = [
+    ...new Set(
+      Object.values(state.plannedActions || {}).filter(
+        (actionId) => actionById(actionId)?.repairCost
+      )
+    )
+  ];
+  if (!repairActionIds.length) return;
+  const required = plannedRepairMaterialCost();
+  const available = availableRepairMaterials();
+  if (required <= available) return;
+  addPlanProblem(
+    problems,
+    repairActionIds,
+    `Repair actions require ${required} Repair Material${required === 1 ? '' : 's'}, but only ${available} available.`
+  );
 }
 
 function renderActiveEffects() {

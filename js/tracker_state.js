@@ -66,6 +66,7 @@ const defaultState = {
   crew: crewNames.map((name, index) => defaultCrewMember(index, name)),
   plannedActions: {},
   confirmedActions: {},
+  salvageLumberBelowDeck: {},
   ongoing: [],
   pendingChecks: [],
   deferredCompletions: [],
@@ -372,6 +373,15 @@ const actionBehaviors = {
   collectRainwater: {
     complete: (s) => {
       s.freshWater += 0.5;
+    }
+  },
+  salvageLumber: {
+    complete: (s, actors) => {
+      const before = Number(s.repairMaterials || 0);
+      s.repairMaterials = before + 2;
+      log(
+        `${actors.join(', ')} salvaged lumber. Repair supplies increased from ${before} to ${s.repairMaterials}.`
+      );
     }
   },
   helm: { labor: (s) => (hasCondition('Calm Seas') ? -1 : 1) },
@@ -822,20 +832,28 @@ function selectedCount(actionId) {
 function boostActive(action) {
   return action.boostGroupSize && selectedForAction(action.id).length >= action.boostGroupSize;
 }
-function actionDuration(action) {
+function actionDuration(action, name = '') {
   const base = boostActive(action)
     ? Number(valueOf(action.boostedDuration, 1))
     : Number(valueOf(action.duration, 1));
-  return base + belowDeckDurationPenalty(action);
+  return base + belowDeckDurationPenalty(action, name);
 }
-function actionLaborCost(action) {
-  return Number(valueOf(action.labor, 0)) + belowDeckLaborPenalty(action);
+function actionLaborCost(action, name = '') {
+  return Number(valueOf(action.labor, 0)) + belowDeckLaborPenalty(action, name);
 }
-function belowDeckDurationPenalty(action) {
-  return action?.belowDeck && !action?.noFloodedExtraTurn && Number(state.waterLevel) >= 5 ? 1 : 0;
+function actionIsBelowDeck(action, name = '') {
+  if (action?.belowDeck) return true;
+  return Boolean(action?.deckChoice && name && state.salvageLumberBelowDeck?.[name]);
 }
-function belowDeckLaborPenalty(action) {
-  return action?.belowDeck && Number(state.waterLevel) >= 10 ? 1 : 0;
+function belowDeckDurationPenalty(action, name = '') {
+  return actionIsBelowDeck(action, name) &&
+    !action?.noFloodedExtraTurn &&
+    Number(state.waterLevel) >= 5
+    ? 1
+    : 0;
+}
+function belowDeckLaborPenalty(action, name = '') {
+  return actionIsBelowDeck(action, name) && Number(state.waterLevel) >= 10 ? 1 : 0;
 }
 function actionActors(name, action) {
   if (action.groupSize || boostActive(action)) return selectedForAction(action.id);

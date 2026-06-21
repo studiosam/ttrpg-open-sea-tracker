@@ -83,6 +83,14 @@
       requirement: 'wreckageAvailable',
       check: 'recoverWreckage'
     },
+    {
+      id: 'salvageLumber',
+      short: 'Lumber',
+      name: 'Salvage Lumber',
+      playerLabel: 'Salvage Lumber',
+      labor: 1,
+      deckChoice: true
+    },
     { id: 'helm', short: 'Helm', name: 'Man Helm', playerLabel: 'Helm', labor: 1, check: 'helm' },
     {
       id: 'pump',

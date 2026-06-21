@@ -88,6 +88,26 @@ No server or build step is required. The app can be opened directly in a browser
 
 ---
 
+# Screenshots
+
+## Landing Screen
+
+![Landing screen](assets/screenshots/landing-page.png)
+
+## New Voyage Setup
+
+![New voyage setup screen](assets/screenshots/setup-page.png)
+
+## DM Tracker
+
+![DM tracker screen](assets/screenshots/dm-screen.png)
+
+## Player View
+
+![Player-facing view](assets/screenshots/player-view.png)
+
+---
+
 # Recommended Screen Setup
 
 - Put `open_sea_tracker.html` on the DM/private monitor.

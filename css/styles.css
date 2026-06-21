@@ -470,6 +470,11 @@ h3 {
   line-height: 1.12;
   white-space: normal;
 }
+.course-state-score-metric .score-metric-detail {
+  font-size: 9px;
+  line-height: 1.05;
+  white-space: nowrap;
+}
 .score-mini-controls {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1396,12 +1401,6 @@ th:nth-child(4) {
   gap: 4px;
   height: 100%;
 }
-.player-course-card .score-value {
-  font-size: clamp(22px, 1.75vw, 32px);
-  line-height: 1.1;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
 .player-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
@@ -1759,6 +1758,19 @@ th:nth-child(4) {
   text-align: center;
   text-overflow: clip;
   white-space: nowrap;
+}
+.player-voyage-card-grid .player-card .score-value {
+  font-size: clamp(28px, 2.2vw, 40px);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.05;
+  overflow-wrap: normal;
+  text-align: center;
+  white-space: nowrap;
+  word-break: normal;
+}
+.player-voyage-card-grid .player-course-card .score-value {
+  font-size: clamp(26px, 2vw, 36px);
 }
 .player-panel-ship .player-card-grid {
   height: calc(100% - 36px);

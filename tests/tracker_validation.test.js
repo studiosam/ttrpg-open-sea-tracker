@@ -823,6 +823,179 @@ test('setup back and reset stay in memory only', () => {
   assert.equal(result.published, null);
 });
 
+test('repair actions are unavailable without repair materials', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    state = structuredClone(defaultState);
+    state.repairMaterials = 0;
+    state.activeLeaks = 1;
+    state.pumpStatus = 'Jammed';
+    state.riggingStatus = 'Broken';
+    state.mastStatus = 'Broken';
+    state.rudderStatus = 'Broken';
+    const options = availableActionOptions('Leopold');
+    return {
+      options,
+      pumpProblem: actionRequirementProblem(actionById('repairPump')),
+      leakProblem: actionRequirementProblem(actionById('repairLeak')),
+      mastProblem: actionRequirementProblem(actionById('repairMast'))
+    };
+  })()`);
+
+  ['repairPump', 'repairRigging', 'repairLeak', 'repairMast', 'repairRudder'].forEach((actionId) =>
+    assert.equal(result.options.includes(actionId), false)
+  );
+  assert.match(result.pumpProblem, /requires 1 Repair Material, but only 0 available/);
+  assert.match(result.leakProblem, /requires 1 Repair Material, but only 0 available/);
+  assert.match(result.mastProblem, /requires 1 Repair Material, but only 0 available/);
+});
+
+test('repair confirmation is blocked without repair materials', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    state = structuredClone(defaultState);
+    state.repairMaterials = 0;
+    state.riggingStatus = 'Broken';
+    state.plannedActions.Leopold = 'repairRigging';
+    const confirmableBefore = canConfirmAction('Leopold');
+    confirmCharacterAction('Leopold', false, false);
+    return {
+      confirmableBefore,
+      confirmedAction: state.confirmedActions.Leopold || '',
+      pendingPromptCount: state.pendingChecks.length,
+      log: state.log
+    };
+  })()`);
+
+  assert.equal(result.confirmableBefore, false);
+  assert.equal(result.confirmedAction, '');
+  assert.equal(result.pendingPromptCount, 0);
+  assert.match(result.log, /could not confirm Repair Rigging/);
+  assert.match(result.log, /require 1 Repair Material, but only 0 available/);
+});
+
+test('repair plans cannot spend more materials than available', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    state = structuredClone(defaultState);
+    state.repairMaterials = 1;
+    state.activeLeaks = 2;
+    state.plannedActions.Leopold = 'repairLeak';
+    state.plannedActions.Delilah = 'repairLeak';
+    const oneTeamProblems = actionPlanProblemsFor('repairLeak');
+    const oneTeamConfirmable = canConfirmAction('Leopold');
+    const toadyOptions = availableActionOptions('Toady');
+    state.plannedActions.Toady = 'repairLeak';
+    state.plannedActions.Xander = 'repairLeak';
+    const twoTeamProblems = actionPlanProblemsFor('repairLeak');
+    const twoTeamConfirmable = canConfirmAction('Leopold');
+    return {
+      oneTeamProblems,
+      oneTeamConfirmable,
+      toadyCanAddRepairLeak: toadyOptions.includes('repairLeak'),
+      twoTeamProblems,
+      twoTeamConfirmable
+    };
+  })()`);
+
+  assert.equal(JSON.stringify(result.oneTeamProblems), '[]');
+  assert.equal(result.oneTeamConfirmable, true);
+  assert.equal(result.toadyCanAddRepairLeak, false);
+  assert.match(
+    result.twoTeamProblems.join(' '),
+    /require 2 Repair Materials, but only 1 available/
+  );
+  assert.equal(result.twoTeamConfirmable, false);
+});
+
+test('salvage lumber adds repair materials as a one-person action', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    state = structuredClone(defaultState);
+    state.waterLevel = 10;
+    state.repairMaterials = 1;
+    const character = crewByName('Leopold');
+    const action = actionById('salvageLumber');
+    applyActionStart(character, action);
+    return {
+      name: action.name,
+      labor: character.labor,
+      duration: actionDuration(action, character.name),
+      repairMaterials: state.repairMaterials,
+      ongoingCount: state.ongoing.length,
+      log: state.log
+    };
+  })()`);
+
+  assert.equal(result.name, 'Salvage Lumber');
+  assert.equal(result.labor, 1);
+  assert.equal(result.duration, 1);
+  assert.equal(result.repairMaterials, 3);
+  assert.equal(result.ongoingCount, 0);
+  assert.match(result.log, /salvaged lumber/);
+});
+
+test('salvage lumber below deck uses flooding penalties', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    state = structuredClone(defaultState);
+    state.waterLevel = 10;
+    state.repairMaterials = 1;
+    state.plannedActions.Leopold = 'salvageLumber';
+    state.salvageLumberBelowDeck.Leopold = true;
+    const character = crewByName('Leopold');
+    const action = actionById('salvageLumber');
+    applyActionStart(character, action);
+    return {
+      labor: character.labor,
+      duration: actionDuration(action, character.name),
+      durationPenalty: belowDeckDurationPenalty(action, character.name),
+      laborPenalty: belowDeckLaborPenalty(action, character.name),
+      turnsRemaining: characterTurnsRemaining('Leopold'),
+      doneInStatus: characterDoneInStatus('Leopold'),
+      repairMaterials: state.repairMaterials,
+      ongoing: state.ongoing[0]
+    };
+  })()`);
+
+  assert.equal(result.labor, 2);
+  assert.equal(result.duration, 2);
+  assert.equal(result.durationPenalty, 1);
+  assert.equal(result.laborPenalty, 1);
+  assert.equal(result.turnsRemaining, '1');
+  assert.equal(result.doneInStatus, 'normal');
+  assert.equal(result.repairMaterials, 1);
+  assert.equal(result.ongoing.actionId, 'salvageLumber');
+  assert.deepEqual([...result.ongoing.actors], ['Leopold']);
+});
+
+test('salvage lumber deck checkbox renders and updates state', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    state = structuredClone(defaultState);
+    state.plannedActions.Leopold = 'salvageLumber';
+    let renderCount = 0;
+    pushUndo = () => {};
+    render = () => { renderCount += 1; };
+    const before = salvageLumberDeckChoiceControl('Leopold', 0, 'salvageLumber', false);
+    setSalvageLumberDeckChoice(0, true);
+    const after = salvageLumberDeckChoiceControl('Leopold', 0, 'salvageLumber', false);
+    setSalvageLumberDeckChoice(0, false);
+    return {
+      before,
+      after,
+      belowDeck: state.salvageLumberBelowDeck.Leopold || false,
+      renderCount
+    };
+  })()`);
+
+  assert.match(result.before, /data-change-action="set-salvage-lumber-deck"/);
+  assert.doesNotMatch(result.before, /<input[^>]* checked/);
+  assert.match(result.after, /<input[^>]* checked/);
+  assert.equal(result.belowDeck, false);
+  assert.equal(result.renderCount, 2);
+});
+
 test('DM controls use delegated handlers with full dispatcher coverage', () => {
   const files = [
     'open_sea_tracker.html',

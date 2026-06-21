@@ -7,6 +7,7 @@ function setPlannedAction(index, actionId) {
   state.actionsCommittedThisTurn = false;
   if (actionId) state.plannedActions[name] = actionId;
   else delete state.plannedActions[name];
+  if (actionId !== 'salvageLumber') delete state.salvageLumberBelowDeck[name];
   delete state.confirmedActions[name];
   const action = actionById(actionId);
   log(action ? `${name} is planning to ${action.name}.` : `${name}'s planned action was cleared.`);
@@ -33,6 +34,7 @@ function clearCharacterAction(name) {
   state.actionsCommittedThisTurn = false;
   delete state.plannedActions[name];
   delete state.confirmedActions[name];
+  delete state.salvageLumberBelowDeck[name];
   log(`${name}'s planned action was cleared.`);
   render();
 }
@@ -127,6 +129,18 @@ function setCrewProficiency(index, field, hasProficiency) {
   render();
 }
 
+function setSalvageLumberDeckChoice(index, belowDeck) {
+  const character = state.crew[index];
+  if (!character || state.confirmedActions[character.name]) return;
+  pushUndo(`Changed ${character.name}'s salvage lumber location`);
+  if (belowDeck) state.salvageLumberBelowDeck[character.name] = true;
+  else delete state.salvageLumberBelowDeck[character.name];
+  log(
+    `${character.name} will salvage lumber ${belowDeck ? 'below deck' : 'above deck'} if that action is confirmed.`
+  );
+  render();
+}
+
 function changeCrewSize(amount) {
   syncFromInputs();
   const beforeSize = state.crew.length;
@@ -152,6 +166,7 @@ function removeCrewReferences(name) {
   delete state.plannedActions[name];
   delete state.confirmedActions[name];
   delete state.overtimeExhaustion[name];
+  delete state.salvageLumberBelowDeck[name];
   Object.keys(state.playerKnowledge || {}).forEach((key) => {
     if (
       state.playerKnowledge[key] &&
@@ -191,6 +206,9 @@ function pruneCrewScopedState() {
   Object.keys(state.overtimeExhaustion || {}).forEach((name) => {
     if (!activeCrewNames.has(name)) delete state.overtimeExhaustion[name];
   });
+  Object.keys(state.salvageLumberBelowDeck || {}).forEach((name) => {
+    if (!activeCrewNames.has(name)) delete state.salvageLumberBelowDeck[name];
+  });
   state.ongoing = state.ongoing
     .map((item) => ({
       ...item,
@@ -218,6 +236,7 @@ function remapCrewName(oldName, newName) {
   remapObjectKey(state.plannedActions, oldName, newName);
   remapObjectKey(state.confirmedActions, oldName, newName);
   remapObjectKey(state.overtimeExhaustion, oldName, newName);
+  remapObjectKey(state.salvageLumberBelowDeck, oldName, newName);
   state.ongoing.forEach((item) => {
     item.actors = remapNameList(item.actors, oldName, newName);
   });
@@ -386,7 +405,7 @@ function groupIsReady(actionId) {
 // Starts a single action after validation. Multi-turn and deferred work branch here.
 function applyActionStart(character, action) {
   const before = Number(character.labor);
-  const laborChange = actionLaborCost(action);
+  const laborChange = actionLaborCost(action, character.name);
   character.labor = Math.max(0, before + laborChange);
   character.lastAction = action.name;
   const isSharedRun = action.sharedStart || action.groupSize || boostActive(action);
@@ -401,7 +420,7 @@ function applyActionStart(character, action) {
   if (isSharedRun && !alreadyStarted && !action.allowMultipleGroups) lockStartedGroup(action);
   if (action.start && (!isSharedRun || (!hasActiveOngoingForAction(action.id) && !alreadyStarted)))
     action.start(state, character);
-  const duration = actionDuration(action);
+  const duration = actionDuration(action, character.name);
   log(
     `${character.name} confirmed ${action.name}. Labor changed from ${before} to ${character.labor}.`
   );
@@ -565,6 +584,24 @@ function spendRepairMaterialsFor(action, actors) {
 function valueOfRepairCost(cost, actors) {
   if (typeof cost === 'function') return cost(state, actors);
   return cost || 0;
+}
+
+function availableRepairMaterials() {
+  return Math.max(0, Number(state.repairMaterials || 0));
+}
+
+function minimumRepairMaterialCost(action) {
+  if (!action?.repairCost) return 0;
+  if (action.id === 'repairLeak') return 1;
+  return Number(valueOfRepairCost(action.repairCost, [state.crew[0]?.name || 'Crew'])) || 0;
+}
+
+function repairMaterialRequirementProblem(action) {
+  const cost = minimumRepairMaterialCost(action);
+  if (!cost) return '';
+  const available = availableRepairMaterials();
+  if (available >= cost) return '';
+  return `${action.name} requires ${cost} Repair Material${cost === 1 ? '' : 's'}, but only ${available} available.`;
 }
 
 // Adds only checks that actually need adjudication; automatic/manual "done" work is logged.
@@ -780,6 +817,8 @@ function actionRequirementProblem(action) {
   if (action.id === 'rest' && state.isNightOvertime)
     return 'Recover is not normally available during Night Overtime.';
   if (action.groupSize && groupAlreadyStarted(action.id)) return '';
+  const repairMaterialProblem = repairMaterialRequirementProblem(action);
+  if (repairMaterialProblem) return repairMaterialProblem;
   if (action.requirement === 'pumpWorking' && state.pumpStatus !== 'Working')
     return 'Bilge Pump is jammed.';
   if (action.requirement === 'pumpJammed' && state.pumpStatus !== 'Jammed')
@@ -1576,6 +1615,8 @@ function handleDelegatedChange(event) {
       return setCrewProficiency(index, control.dataset.field, control.checked);
     case 'set-planned-action':
       return setPlannedAction(index, control.value);
+    case 'set-salvage-lumber-deck':
+      return setSalvageLumberDeckChoice(index, control.checked);
     default:
       console.warn(`No delegated change handler for action: ${action}`);
   }

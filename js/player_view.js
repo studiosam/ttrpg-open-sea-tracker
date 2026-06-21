@@ -31,6 +31,10 @@ function actionMetadataByName(actionName) {
 function actionGetsFloodedExtraTurn(action) {
   return Boolean(action?.belowDeck && !action?.noFloodedExtraTurn);
 }
+function actionIsBelowDeckForCrew(state, action, name) {
+  if (action?.belowDeck) return true;
+  return Boolean(action?.deckChoice && name && state.salvageLumberBelowDeck?.[name]);
+}
 
 // Prefer the filtered player snapshot. Fall back to the full save only when the DM page has not published yet.
 function readPlayerState() {
@@ -94,14 +98,18 @@ function publicCrewTurnsRemainingFromFullState(state, name) {
   if (ongoing) return String(Number(ongoing.remaining || 1));
   const actionId = state.confirmedActions?.[name];
   if (!actionId || actionId === 'idle') return '';
-  return String(publicActionDurationFromFullState(state, actionId));
+  return String(publicActionDurationFromFullState(state, actionId, name));
 }
 
-function publicActionDurationFromFullState(state, actionId) {
+function publicActionDurationFromFullState(state, actionId, name = '') {
   const action = actionMetadata(actionId);
   const base = Number(action?.duration || 1);
   const floodedPenalty =
-    actionGetsFloodedExtraTurn(action) && Number(state.waterLevel || 0) >= 5 ? 1 : 0;
+    actionIsBelowDeckForCrew(state, action, name) &&
+    actionGetsFloodedExtraTurn({ ...action, belowDeck: true }) &&
+    Number(state.waterLevel || 0) >= 5
+      ? 1
+      : 0;
   return base + floodedPenalty;
 }
 
@@ -112,7 +120,10 @@ function publicCrewDoneInStatusFromFullState(state, name) {
   if (ongoing) return 'normal';
   const actionId = state.confirmedActions?.[name];
   if (!actionId || actionId === 'idle') return '';
-  return actionGetsFloodedExtraTurn(actionMetadata(actionId)) && Number(state.waterLevel || 0) >= 5
+  const action = actionMetadata(actionId);
+  return actionIsBelowDeckForCrew(state, action, name) &&
+    actionGetsFloodedExtraTurn({ ...action, belowDeck: true }) &&
+    Number(state.waterLevel || 0) >= 5
     ? 'flooded'
     : 'normal';
 }

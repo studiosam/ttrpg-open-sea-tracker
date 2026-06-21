@@ -1,6 +1,14 @@
-node_modules
+node_modules/
+
 docs/design_document.txt
 docs/MarrowWindActions.txt
 docs/todo.txt
 docs/play_test_notes.txt
+
 .vscode/settings.json
+
+assets/screenshots/
+dm-screen.png
+landing-page.png
+player-view.png
+setup-page.png
