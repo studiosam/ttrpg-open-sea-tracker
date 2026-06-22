@@ -19,7 +19,7 @@ This project is a working MVP and public demo.
 Open the hosted version here:
 
 ```text
-https://studiosam.github.io/dnd-open-sea-tracker/
+https://studiosam.github.io/ttrpg-open-sea-tracker/
 ```
 
 The root page redirects to the DM tracker. Once a voyage is active, use **Open Player View** in the DM header to open the player-facing screen.
