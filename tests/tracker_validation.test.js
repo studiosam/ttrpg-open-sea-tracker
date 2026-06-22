@@ -92,10 +92,11 @@ function loadPlayerContext() {
         return null;
       }
     },
-    window: { addEventListener() {} },
+    addEventListener() {},
     setInterval() {}
   };
   context.globalThis = context;
+  context.window = context;
   vm.createContext(context);
   vm.runInContext(readProjectFile('js/action_metadata.js'), context, {
     filename: 'js/action_metadata.js'
@@ -218,6 +219,79 @@ test('pending prompt rendering escapes imported prompt text', () => {
   assert.doesNotMatch(result.innerHTML, /<script/);
 });
 
+test('pending prompt cards show accessible advantage and disadvantage markers', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    const appended = [];
+    const box = {
+      innerHTML: '',
+      appendChild(node){
+        appended.push({className: node.className, innerHTML: node.innerHTML});
+      }
+    };
+    document = {
+      getElementById(id){ return id === 'pendingChecks' ? box : null; },
+      createElement(){ return {className: '', innerHTML: ''}; }
+    };
+    state = structuredClone(defaultState);
+    state.turnStep = 4;
+    state.pendingChecks = [
+      {
+        id: 'adv',
+        phase: 'action',
+        type: 'check',
+        character: 'Leopold',
+        title: 'Helm Check',
+        detail: 'This character rolls with advantage from Water Vehicles proficiency.',
+        dc: 12,
+        status: 'pending'
+      },
+      {
+        id: 'dis',
+        phase: 'action',
+        type: 'check',
+        character: 'Delilah',
+        title: 'Fishing Check',
+        detail: 'Dense Fog: roll this fishing check at disadvantage.',
+        dc: 15,
+        status: 'pending'
+      },
+      {
+        id: 'neutral',
+        phase: 'action',
+        type: 'check',
+        character: 'Toady',
+        title: 'Bilge Rod',
+        detail: 'Resolve normally.',
+        dc: 15,
+        status: 'pending'
+      },
+      {
+        id: 'cancelled',
+        phase: 'action',
+        type: 'check',
+        character: 'Xander',
+        title: 'Cancelled Roll',
+        detail: 'Dense Fog disadvantage is canceled by this character advantage, so roll normally.',
+        dc: 15,
+        status: 'pending'
+      }
+    ];
+    renderPendingChecks();
+    return appended;
+  })()`);
+
+  assert.match(result[0].className, /advantage/);
+  assert.match(result[0].innerHTML, /▲ Advantage/);
+  assert.match(result[0].innerHTML, /aria-label="Advantage"/);
+  assert.match(result[1].className, /disadvantage/);
+  assert.match(result[1].innerHTML, /▼ Disadvantage/);
+  assert.match(result[1].innerHTML, /aria-label="Disadvantage"/);
+  assert.doesNotMatch(result[2].innerHTML, /Advantage|Disadvantage/);
+  assert.doesNotMatch(result[3].className, /advantage|disadvantage/);
+  assert.doesNotMatch(result[3].innerHTML, /Advantage|Disadvantage/);
+});
+
 test('import validation rejects out-of-range values', () => {
   const tracker = loadTrackerContext();
   const result = tracker.evaluate(`(() => {
@@ -279,6 +353,43 @@ test('import validation rejects malformed nested shapes', () => {
   assert.match(result[5], /Turn ledger Pumping must be numeric/);
   assert.match(result[6], /Water knowledge known-this-turn flag must be true or false/);
   assert.match(result[7], /Crew entry 1 Labor must be 0 or greater/);
+});
+
+test('import validation allows null prompt DCs and rejects invalid DCs', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    const promptBase = {
+      id: 'prompt-1',
+      phase: 'action',
+      type: 'manual',
+      status: 'pending',
+      title: 'Manual Prompt',
+      detail: 'Resolve manually.'
+    };
+    const cases = [
+      {pendingChecks: [{...promptBase, dc: undefined}]},
+      {pendingChecks: [{...promptBase, dc: null}]},
+      {pendingChecks: [{...promptBase, status: 'resolved', dc: null}]},
+      {pendingChecks: [{...promptBase, type: 'check', title: 'Check Prompt', dc: 15}]},
+      {pendingChecks: [{...promptBase, dc: -1}]},
+      {pendingChecks: [{...promptBase, dc: {}}]}
+    ];
+    return cases.map(payload => {
+      try {
+        normalizeImportedState({...structuredClone(defaultState), ...payload});
+        return 'accepted';
+      } catch (error) {
+        return error.message;
+      }
+    });
+  })()`);
+
+  assert.equal(result[0], 'accepted');
+  assert.equal(result[1], 'accepted');
+  assert.equal(result[2], 'accepted');
+  assert.equal(result[3], 'accepted');
+  assert.match(result[4], /Pending prompt 1 DC must be a finite number 0 or greater/);
+  assert.match(result[5], /Pending prompt 1 DC must be a finite number 0 or greater/);
 });
 
 test('import normalization migrates compatible old saves', () => {
@@ -450,6 +561,54 @@ test('demo mode save snapshot guard prevents gameplay autosaves', () => {
   assert.equal(result.demoMode, true);
   assert.equal(result.storedShipName, 'Protected Save');
   assert.equal(result.storedDay, 5);
+});
+
+test('demo mode reset stays in demo and preserves real save', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    localStorage.setItem('openSeaTracker', JSON.stringify({...defaultState, shipName: 'Protected Save', day: 5}));
+    syncFromInputs = () => {};
+    render = () => {};
+    renderUndoStatus = () => {};
+    confirm = () => true;
+    loadDemoVoyage();
+    state.shipName = 'Changed Demo';
+    state.day = 4;
+    state.waterLevel = 12;
+    resetState();
+    const resetSnapshot = {
+      appMode,
+      demoMode: state.demoMode,
+      shipName: state.shipName,
+      day: state.day,
+      waterLevel: state.waterLevel,
+      banner: demoModeBannerMarkup(),
+      published: JSON.parse(localStorage.getItem(PLAYER_STATE_KEY)),
+      saved: JSON.parse(localStorage.getItem('openSeaTracker')),
+      log: state.log
+    };
+    resumeCurrentVoyage();
+    return {
+      ...resetSnapshot,
+      resumedDemoMode: state.demoMode,
+      resumedShipName: state.shipName,
+      resumedDay: state.day
+    };
+  })()`);
+
+  assert.equal(result.appMode, 'tracker');
+  assert.equal(result.demoMode, true);
+  assert.equal(result.shipName, 'The Marrowwind');
+  assert.equal(result.day, 1);
+  assert.equal(result.waterLevel, 1);
+  assert.match(result.banner, /Demo Mode/);
+  assert.equal(result.published.shipName, 'The Marrowwind');
+  assert.equal(result.saved.shipName, 'Protected Save');
+  assert.equal(result.saved.day, 5);
+  assert.match(result.log, /Demo voyage reset/);
+  assert.equal(result.resumedDemoMode, false);
+  assert.equal(result.resumedShipName, 'Protected Save');
+  assert.equal(result.resumedDay, 5);
 });
 
 test('resume after unsaved demo keeps the original saved voyage', () => {
@@ -1222,7 +1381,7 @@ test('salvage lumber below deck uses flooding penalties', () => {
   assert.equal(result.duration, 2);
   assert.equal(result.durationPenalty, 1);
   assert.equal(result.laborPenalty, 1);
-  assert.equal(result.turnsRemaining, '1');
+  assert.equal(result.turnsRemaining, '2');
   assert.equal(result.doneInStatus, 'normal');
   assert.equal(result.repairMaterials, 1);
   assert.equal(result.ongoing.actionId, 'salvageLumber');
@@ -1307,6 +1466,32 @@ test('published player state includes ship name', () => {
     return JSON.parse(localStorage.getItem(PLAYER_STATE_KEY)).shipName;
   })()`);
   assert.equal(shipName, 'The Tide Needle');
+});
+
+test('player view labels bilge rod action clearly', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    state = structuredClone(defaultState);
+    state.plannedActions.Leopold = 'examineRod';
+    state.confirmedActions.Leopold = 'examineRod';
+    publishPlayerState();
+    const playerState = JSON.parse(localStorage.getItem(PLAYER_STATE_KEY));
+    return playerState.crew.find((character) => character.name === 'Leopold').currentAction;
+  })()`);
+  assert.equal(result, 'Examine Bilge Sounding Rod');
+
+  const player = loadPlayerContext();
+  const renderedAction = player.evaluate(`
+    crewActionText({currentAction: 'Examine Bilge Sounding Rod'})
+  `);
+  assert.equal(renderedAction, 'Investigate Bilge Rod');
+  const fallbackAction = player.evaluate(`
+    publicCrewActionFromFullState(
+      {plannedActions: {Leopold: 'examineRod'}, crew: [{name: 'Leopold'}], ongoing: []},
+      'Leopold'
+    )
+  `);
+  assert.equal(fallbackAction, 'Examine Bilge Sounding Rod');
 });
 
 test('player header renders ship name with old snapshot fallback', () => {
@@ -1515,6 +1700,68 @@ test('player top-row values are centered like systems', () => {
     styles,
     /\.player-voyage-card-grid \.score-value,\s*\.player-panel-supplies \.score-value\s*\{[\s\S]*align-self:\s*center;[\s\S]*justify-self:\s*center;[\s\S]*text-align:\s*center;/
   );
+  assert.match(
+    styles,
+    /\.player-voyage-card-grid \.player-course-card \.score-value,\s*\.player-panel-supplies \.player-card \.score-value\s*\{[\s\S]*font-size:\s*clamp\(26px,\s*2vw,\s*36px\);/
+  );
+});
+
+test('multi-turn actions display full duration and tick after water update', () => {
+  const tracker = loadTrackerContext();
+  const result = tracker.evaluate(`(() => {
+    syncFromInputs = () => {};
+    render = () => {};
+    renderUndoStatus = () => {};
+    saveStateSnapshot = () => {};
+    pushUndo = () => {};
+    state = structuredClone(defaultState);
+    state.plannedActions.Leopold = 'rest';
+    state.confirmedActions.Leopold = 'rest';
+    applyActionStart(crewByName('Leopold'), actionById('rest'));
+    publishPlayerState();
+    const startPlayer = JSON.parse(localStorage.getItem(PLAYER_STATE_KEY)).crew.find(
+      (character) => character.name === 'Leopold'
+    );
+    const start = {
+      dmTurnsRemaining: characterTurnsRemaining('Leopold'),
+      playerTurnsRemaining: startPlayer.turnsRemaining,
+      ongoingRemaining: state.ongoing[0].remaining
+    };
+    endTurn();
+    const afterWater = {
+      dmTurnsRemaining: characterTurnsRemaining('Leopold'),
+      ongoingRemaining: state.ongoing[0].remaining,
+      ongoingStatus: state.ongoing[0].status
+    };
+    advanceTurn(false, false, false);
+    confirmCharacterAction('Leopold', false, false);
+    endTurn();
+    const afterSecondWater = {
+      ongoingRemaining: state.ongoing[0].remaining,
+      ongoingStatus: state.ongoing[0].status
+    };
+    state = structuredClone(defaultState);
+    state.waterLevel = 5;
+    state.plannedActions.Leopold = 'bucket';
+    state.confirmedActions.Leopold = 'bucket';
+    applyActionStart(crewByName('Leopold'), actionById('bucket'));
+    const flooded = {
+      duration: actionDuration(actionById('bucket'), 'Leopold'),
+      dmTurnsRemaining: characterTurnsRemaining('Leopold')
+    };
+    return {start, afterWater, afterSecondWater, flooded};
+  })()`);
+
+  assert.equal(result.start.dmTurnsRemaining, '2');
+  assert.equal(result.start.playerTurnsRemaining, '2');
+  assert.equal(result.start.ongoingRemaining, 2);
+  assert.equal(result.afterWater.dmTurnsRemaining, '1');
+  assert.equal(result.afterWater.ongoingRemaining, 1);
+  assert.equal(result.afterWater.ongoingStatus, 'active');
+  assert.equal(result.afterSecondWater.ongoingRemaining, 0);
+  assert.equal(result.afterSecondWater.ongoingStatus, 'resolved');
+  assert.equal(result.flooded.duration, 3);
+  assert.equal(result.flooded.dmTurnsRemaining, '3');
 });
 
 test('idle shows dash for turns remaining', () => {
@@ -1608,14 +1855,18 @@ test('scripted scene turn forces idle and preserves ongoing work', () => {
     ];
     state.ongoing = [{
       id:'ongoing-rest',
-      actionId:'rest',
+      actionId:'resetNet',
       actors:['Toady'],
-      remaining:1,
+      remaining:2,
       status:'active',
       createdDay:1,
       createdTurn:1
     }];
     forceScriptedSceneTurn();
+    publishPlayerState();
+    const playerState = JSON.parse(localStorage.getItem(PLAYER_STATE_KEY));
+    const playerCrew = playerState.crew.find(character => character.name === 'Toady');
+    endTurn();
     return {
       scriptedSceneTurn: state.scriptedSceneTurn,
       turnStep: state.turnStep,
@@ -1623,6 +1874,9 @@ test('scripted scene turn forces idle and preserves ongoing work', () => {
       confirmations: state.confirmedActions,
       pendingTitles: state.pendingChecks.map(prompt => prompt.title),
       ongoingRemaining: state.ongoing[0].remaining,
+      ongoingStatus: state.ongoing[0].status,
+      playerAction: playerCrew.currentAction,
+      playerTurnsRemaining: playerCrew.turnsRemaining,
       log: state.log
     };
   })()`);
@@ -1633,6 +1887,17 @@ test('scripted scene turn forces idle and preserves ongoing work', () => {
   assert.equal(result.confirmations.Leopold, 'idle');
   assert.equal(result.pendingTitles.includes('Action Check'), false);
   assert.equal(result.pendingTitles.includes('Pre Check'), true);
-  assert.equal(result.ongoingRemaining, 1);
+  assert.equal(result.ongoingRemaining, 2);
+  assert.equal(result.ongoingStatus, 'active');
+  assert.match(result.playerAction, /Forced Idle/);
+  assert.match(result.playerAction, /preserving Reset Fishing Net/);
+  assert.equal(result.playerTurnsRemaining, '2');
   assert.match(result.log, /scripted scene/i);
+
+  const player = loadPlayerContext();
+  const renderedAction = player.evaluate(
+    `crewActionText({currentAction: ${JSON.stringify(result.playerAction)}})`
+  );
+  assert.match(renderedAction, /Forced Idle/);
+  assert.match(renderedAction, /preserving Reset Fishing Net/);
 });

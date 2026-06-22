@@ -1383,17 +1383,19 @@ function renderPendingChecks() {
     return;
   }
   pending.forEach((prompt) => {
+    const rollClass = promptRollClass(prompt);
     const card = document.createElement('div');
     card.className = [
       'prompt-card',
       safeClassTokens(prompt.type || 'manual'),
       safeClassTokens(prompt.emphasis || ''),
-      promptRollClass(prompt)
+      rollClass
     ]
       .filter(Boolean)
       .join(' ');
     const titleText = prompt.dc ? `DC ${h(prompt.dc)} ${h(prompt.title)}` : h(prompt.title);
     const actorText = prompt.character ? `${h(prompt.character)}: ` : '';
+    const rollMarker = promptRollMarker(rollClass);
     const outcomeButtons = orderedPromptOutcomes(prompt.outcomes || [])
       .map(
         (outcome) =>
@@ -1407,13 +1409,21 @@ function renderPendingChecks() {
         : `<button class="good" data-action="resolve-prompt" data-prompt-id="${h(prompt.id)}" data-result="success">Success</button>
         <button data-action="resolve-prompt" data-prompt-id="${h(prompt.id)}" data-result="manual">Manual / Done</button>
         <button class="danger" data-action="resolve-prompt" data-prompt-id="${h(prompt.id)}" data-result="failure">Failure</button>`);
-    card.innerHTML = `<div class="prompt-title">${actorText}${titleText}</div>
+    card.innerHTML = `<div class="prompt-title">${actorText}${titleText}${rollMarker}</div>
       <div class="prompt-detail">${h(prompt.detail)}</div>
       <div class="actions">
         ${defaultButtons}
       </div>`;
     box.appendChild(card);
   });
+}
+
+function promptRollMarker(rollClass) {
+  if (rollClass === 'advantage')
+    return '<span class="roll-marker advantage" aria-label="Advantage">▲ Advantage</span>';
+  if (rollClass === 'disadvantage')
+    return '<span class="roll-marker disadvantage" aria-label="Disadvantage">▼ Disadvantage</span>';
+  return '';
 }
 
 // Prompt card borders communicate advantage/disadvantage without changing the underlying rules.

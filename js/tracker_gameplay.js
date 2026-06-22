@@ -429,7 +429,7 @@ function applyActionStart(character, action) {
   const canCompleteNow = action.completeAfterAllConfirmed
     ? allActorsConfirmed
     : !isSharedRun || !alreadyStarted;
-  if (duration > 1) createOngoing(character.name, action, duration - 1);
+  if (duration > 1) createOngoing(character.name, action, duration);
   else if (
     action.deferComplete &&
     (!isSharedRun || !alreadyStarted || action.allowMultipleGroups)
@@ -1325,12 +1325,11 @@ function tickConditions() {
     .filter((c) => c.turns > 0);
 }
 
-// Ongoing work only ticks down after the character confirms the automatic continuation.
+// Ongoing work ticks down after water/update timing once the action is confirmed for that turn.
 function tickOngoing() {
   state.ongoing
     .filter((o) => o.status === 'active')
     .forEach((o) => {
-      if (o.createdDay === state.day && o.createdTurn === state.turn) return;
       const allConfirmed = o.actors.every((name) => state.confirmedActions[name] === o.actionId);
       if (!allConfirmed) return;
       o.remaining = Math.max(0, Number(o.remaining) - 1);

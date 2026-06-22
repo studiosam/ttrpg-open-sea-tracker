@@ -130,6 +130,11 @@ function publicCrewDoneInStatusFromFullState(state, name) {
 
 function publicCrewActionFromFullState(state, name) {
   const actionId = state.plannedActions?.[name];
+  if (state.scriptedSceneTurn && actionId === 'idle') {
+    const preservedActionName = publicPreservedOngoingActionName(state, name);
+    if (preservedActionName)
+      return `Forced Idle — Scene/Hazard (preserving ${preservedActionName})`;
+  }
   if (!actionId)
     return (state.crew || []).find((character) => character.name === name)?.lastAction || '';
   return publicActionName(actionId);
@@ -137,6 +142,14 @@ function publicCrewActionFromFullState(state, name) {
 
 function publicActionName(actionId) {
   return actionMetadata(actionId)?.name || actionId;
+}
+
+function publicPreservedOngoingActionName(state, name) {
+  const ongoing = (state.ongoing || []).find(
+    (item) => item.status === 'active' && (item.actors || []).includes(name)
+  );
+  if (!ongoing) return '';
+  return publicActionName(ongoing.actionId);
 }
 
 // Unknown values stay hidden until the DM reveals them or an action updates player knowledge.

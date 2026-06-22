@@ -252,13 +252,17 @@ On the setup screen:
 - [ ] Confirm `Start Voyage` is disabled or blocked.
 - [ ] Confirm a ship-name error appears.
 - [ ] Restore a valid ship name.
-- [ ] Enter an overly long ship name.
-- [ ] Confirm `Start Voyage` is disabled or blocked.
-- [ ] Confirm a ship-name length error appears.
+- [ ] Try to paste or type a ship name longer than the field allows.
+- [ ] Confirm the ship-name field prevents extra characters or truncates to the allowed limit.
+- [ ] Confirm setup remains usable and no misleading ship-name length error appears.
 - [ ] Restore a valid ship name.
 - [ ] Clear an active crew name.
 - [ ] Confirm `Start Voyage` is disabled or blocked.
 - [ ] Confirm a crew-name error appears.
+- [ ] Restore the crew name.
+- [ ] Try to paste or type an active crew name longer than the field allows.
+- [ ] Confirm the crew-name field prevents extra characters or truncates to the allowed limit.
+- [ ] Confirm setup remains usable and no misleading crew-name length error appears.
 - [ ] Restore the crew name.
 - [ ] Give two active crew members the same name.
 - [ ] Confirm duplicate crew names are blocked.

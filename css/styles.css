@@ -1270,6 +1270,23 @@ th:nth-child(4) {
   font-weight: 700;
   margin-bottom: 4px;
 }
+.roll-marker {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1;
+  vertical-align: middle;
+}
+.roll-marker.advantage {
+  color: var(--good);
+}
+.roll-marker.disadvantage {
+  color: var(--danger);
+}
 .prompt-detail {
   color: var(--muted);
   font-size: 12px;
@@ -1875,7 +1892,8 @@ th:nth-child(4) {
   white-space: nowrap;
   word-break: normal;
 }
-.player-voyage-card-grid .player-course-card .score-value {
+.player-voyage-card-grid .player-course-card .score-value,
+.player-panel-supplies .player-card .score-value {
   font-size: clamp(26px, 2vw, 36px);
 }
 .player-panel-ship .player-card-grid {

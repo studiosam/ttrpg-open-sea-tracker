@@ -233,6 +233,7 @@ Recently completed:
 - Removed obsolete scratch/staging doc references.
 - Removed the stale changelog reference from the README.
 - Confirmed no separate changelog is needed.
+- Updated manual testing notes for setup field max-length behavior.
 
 ---
 

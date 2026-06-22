@@ -588,6 +588,7 @@ function validateImportedPendingChecksPayload(pendingChecks, errors) {
     validateImportedEnum(prompt.status, `${promptLabel} status`, IMPORT_PROMPT_STATUSES, errors);
     if (
       prompt.dc !== undefined &&
+      prompt.dc !== null &&
       (!isFiniteNumericImportValue(prompt.dc) || Number(prompt.dc) < 0)
     )
       errors.push(`${promptLabel} DC must be a finite number 0 or greater.`);
@@ -731,8 +732,21 @@ function publishPlayerState() {
 
 function playerCrewAction(name) {
   const plannedAction = actionById(state.plannedActions?.[name]);
+  if (state.scriptedSceneTurn && plannedAction?.id === 'idle') {
+    const preservedActionName = preservedOngoingActionName(name);
+    if (preservedActionName)
+      return `Forced Idle — Scene/Hazard (preserving ${preservedActionName})`;
+  }
   if (plannedAction) return plannedAction.name;
   return crewByName(name)?.lastAction || '';
+}
+
+function preservedOngoingActionName(name) {
+  const ongoing = state.ongoing.find(
+    (item) => item.status === 'active' && (item.actors || []).includes(name)
+  );
+  if (!ongoing) return '';
+  return actionById(ongoing.actionId)?.name || ongoing.actionId;
 }
 
 function playerKnownValue(key) {
@@ -769,6 +783,14 @@ function resetState() {
   if (confirm('Reset tracker?')) {
     pushUndo('Reset tracker');
     clearActionCommitSnapshot();
+    if (state.demoMode) {
+      state = createDemoTrackerState();
+      state.log = `Day ${state.day}, Turn ${state.turn}: Demo voyage reset.\n`;
+      enterTrackerMode();
+      publishPlayerState();
+      render();
+      return;
+    }
     state = structuredClone(defaultState);
     enterTrackerMode();
     render();

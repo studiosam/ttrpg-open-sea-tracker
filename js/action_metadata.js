@@ -52,7 +52,7 @@
       id: 'examineRod',
       short: 'Bilge Rod',
       name: 'Examine Bilge Sounding Rod',
-      playerLabel: 'Sound Bilge',
+      playerLabel: 'Investigate Bilge Rod',
       labor: 0,
       belowDeck: true,
       noFloodedExtraTurn: true,
