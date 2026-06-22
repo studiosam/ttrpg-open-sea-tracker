@@ -216,22 +216,23 @@ Only fix issues that surface during manual testing.
 
 Do not add new feature work during a bug-fix pass unless the fix clearly requires it.
 
-## 3. Clean Up Old Scratch Notes
+## 3. Keep Documentation Current
 
-Status: Next Cleanup
+Status: Ongoing
 
-Review old scratch/staging files and remove or archive anything that is no longer a source of truth.
+Keep `README.md`, `docs/ROADMAP.md`, `docs/MANUAL_TESTING.md`, `docs/design_document.txt`, and `docs/MarrowWindActions.txt` aligned with the current app.
 
-Known items:
+Current policy:
 
-- Delete the completed landing/setup staging file if it still exists.
-- Review `docs/todo.txt`.
-- Move any still-useful item into this roadmap.
-- Delete obsolete scratch notes after useful content is preserved.
+- Git history is the changelog.
+- The roadmap is the source of truth for planned work.
+- Temporary staging or scratch notes should be deleted once useful details are moved into the roadmap or implementation.
 
-Reason:
+Recently completed:
 
-The roadmap should be the main planning document. Loose scratch notes should not remain the source of truth.
+- Removed obsolete scratch/staging doc references.
+- Removed the stale changelog reference from the README.
+- Confirmed no separate changelog is needed.
 
 ---
 
@@ -643,7 +644,7 @@ Use this order unless a table need forces something else:
 
 1. Run focused manual browser testing.
 2. Fix any manual test failures.
-3. Clean up completed scratch/staging docs.
+3. Keep documentation current as changes land.
 4. Add starting presets.
 5. Add setup polish that presets require.
 6. Move Open Sea Events into structured table data.

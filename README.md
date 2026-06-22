@@ -179,7 +179,8 @@ No server or build step is required. The app can be opened directly in a browser
 - `docs/ROADMAP.md` - development roadmap.
 - `docs/design_document.txt` - system design notes and turn structure.
 - `docs/MarrowWindActions.txt` - current action reference.
-- `docs/CHANGELOG.md` - practical current-state history notes.
+
+Project history is tracked through Git commits rather than a separate changelog.
 
 ---
 
