@@ -1866,6 +1866,7 @@ test('scripted scene turn forces idle and preserves ongoing work', () => {
     publishPlayerState();
     const playerState = JSON.parse(localStorage.getItem(PLAYER_STATE_KEY));
     const playerCrew = playerState.crew.find(character => character.name === 'Toady');
+    const eventCrew = playerState.crew.find(character => character.name === 'Leopold');
     endTurn();
     return {
       scriptedSceneTurn: state.scriptedSceneTurn,
@@ -1876,6 +1877,7 @@ test('scripted scene turn forces idle and preserves ongoing work', () => {
       ongoingRemaining: state.ongoing[0].remaining,
       ongoingStatus: state.ongoing[0].status,
       playerAction: playerCrew.currentAction,
+      eventAction: eventCrew.currentAction,
       playerTurnsRemaining: playerCrew.turnsRemaining,
       log: state.log
     };
@@ -1889,8 +1891,10 @@ test('scripted scene turn forces idle and preserves ongoing work', () => {
   assert.equal(result.pendingTitles.includes('Pre Check'), true);
   assert.equal(result.ongoingRemaining, 2);
   assert.equal(result.ongoingStatus, 'active');
-  assert.match(result.playerAction, /Forced Idle/);
-  assert.match(result.playerAction, /preserving Reset Fishing Net/);
+  assert.match(result.playerAction, /Responding to Event/);
+  assert.match(result.playerAction, /Reset Fishing Net paused/);
+  assert.doesNotMatch(result.playerAction, /Forced Idle|preserving|scripted/i);
+  assert.equal(result.eventAction, 'Responding to Event');
   assert.equal(result.playerTurnsRemaining, '2');
   assert.match(result.log, /scripted scene/i);
 
@@ -1898,6 +1902,7 @@ test('scripted scene turn forces idle and preserves ongoing work', () => {
   const renderedAction = player.evaluate(
     `crewActionText({currentAction: ${JSON.stringify(result.playerAction)}})`
   );
-  assert.match(renderedAction, /Forced Idle/);
-  assert.match(renderedAction, /preserving Reset Fishing Net/);
+  assert.match(renderedAction, /Responding to Event/);
+  assert.match(renderedAction, /Reset Fishing Net paused/);
+  assert.doesNotMatch(renderedAction, /Forced Idle|preserving|scripted/i);
 });

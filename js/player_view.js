@@ -132,12 +132,16 @@ function publicCrewActionFromFullState(state, name) {
   const actionId = state.plannedActions?.[name];
   if (state.scriptedSceneTurn && actionId === 'idle') {
     const preservedActionName = publicPreservedOngoingActionName(state, name);
-    if (preservedActionName)
-      return `Forced Idle — Scene/Hazard (preserving ${preservedActionName})`;
+    return publicScriptedSceneActionName(preservedActionName);
   }
   if (!actionId)
     return (state.crew || []).find((character) => character.name === name)?.lastAction || '';
   return publicActionName(actionId);
+}
+
+function publicScriptedSceneActionName(pausedActionName) {
+  if (pausedActionName) return `Responding to Event — ${pausedActionName} paused`;
+  return 'Responding to Event';
 }
 
 function publicActionName(actionId) {
@@ -511,7 +515,7 @@ function renderCrew(crew) {
       <div>Labor</div>
       <div>Exhaustion</div>
       <div>Selected Action</div>
-      <div>Done In</div>
+      <div>Turns</div>
     </div>
     ${crew
       .map(

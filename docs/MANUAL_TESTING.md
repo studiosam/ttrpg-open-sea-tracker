@@ -186,6 +186,36 @@ Expected behavior:
 - Loading demo should not alter the real saved voyage.
 - `Resume Current Voyage` should ignore an unsaved demo and resume the real saved voyage.
 
+## Demo Reset
+
+Use this section while Demo Mode is loaded.
+
+Before resetting:
+
+- [ ] Change at least one visible demo value, such as day, turn, water level, or a crew action.
+- [ ] Confirm the Demo Mode banner is visible.
+- [ ] If a real saved voyage exists, note its ship name, day, turn, and at least one crew name.
+
+Then:
+
+- [ ] Click `Reset`.
+- [ ] Confirm the reset prompt appears.
+- [ ] Confirm the reset.
+- [ ] Confirm the app remains in Demo Mode.
+- [ ] Confirm the Demo Mode banner remains visible.
+- [ ] Confirm the demo returns to the default Marrowwind state.
+- [ ] Confirm the activity log records that the demo voyage was reset.
+- [ ] Confirm the player view receives the reset demo state.
+- [ ] Return to landing or reload the DM page.
+- [ ] Click `Resume Current Voyage`.
+- [ ] If a real saved voyage existed before the demo, confirm that original real saved voyage resumes.
+
+Expected behavior:
+
+- Demo Reset should reset only the temporary demo state.
+- Demo Reset should not clear, overwrite, or replace the normal saved-voyage localStorage slot.
+- Demo Reset should not exit Demo Mode.
+
 ## Demo Save Conversion
 
 With Demo Mode loaded:
@@ -332,6 +362,7 @@ Optional trait check:
 
 - [ ] Assign an action affected by a changed trait, such as Helm, Navigate, or Fishing.
 - [ ] Confirm the relevant prompt text reflects the selected background/proficiency advantage source.
+- [ ] Confirm the prompt card shows a visible text-accessible advantage marker, such as `▲ Advantage` or equivalent wording.
 
 ---
 
@@ -509,6 +540,8 @@ Then:
 - [ ] Confirm a Navigate prompt appears.
 - [ ] Confirm the Navigate prompt shows a visible DC.
 - [ ] Confirm the prompt text reflects Navigator's Tools or Cartographer's Tools advantage when applicable.
+- [ ] Confirm the prompt card shows a visible advantage marker when advantage applies.
+- [ ] Confirm the prompt card does not show an advantage or disadvantage marker when neither applies.
 - [ ] Resolve the Navigate prompt with a success result.
 - [ ] Confirm the Course Meter changes appropriately.
 - [ ] Confirm the Course State updates if the result changes it.
@@ -539,6 +572,9 @@ Then:
 - [ ] Confirm a Helm prompt appears if mast and rudder are functional.
 - [ ] Confirm the prompt shows a visible DC.
 - [ ] Confirm the prompt text reflects Sailor/Pirate or Water Vehicles advantage when applicable.
+- [ ] Confirm the prompt card shows a visible advantage marker when advantage applies.
+- [ ] Confirm disadvantage markers are visible and text-accessible when a condition imposes disadvantage.
+- [ ] Confirm cancelled advantage/disadvantage does not display a misleading marker.
 - [ ] Resolve the prompt with a success result.
 - [ ] Confirm travel changes according to Course State.
 - [ ] Confirm the log records the Helm result.
@@ -577,6 +613,7 @@ On the DM screen:
 
 On the player screen:
 
+- [ ] Confirm the Bilge Rod action/status displays as `Investigate Bilge Rod` if the action is visible.
 - [ ] Confirm Water Level appears after the Bilge Rod reveals it.
 - [ ] Confirm Total Ingress only appears when the rules say it should.
 - [ ] Confirm below-cargo water is hidden before it is revealed.
@@ -600,6 +637,12 @@ On the player screen:
 
 - [ ] Confirm participating crew display the correct current action.
 - [ ] Confirm turns remaining displays correctly for ongoing work.
+- [ ] Confirm a 1-turn ongoing action displays `Done In: 1` or equivalent wording immediately after confirmation.
+- [ ] Confirm a 2-turn ongoing action displays `Done In: 2` or equivalent wording immediately after confirmation.
+- [ ] If below-deck water penalty applies, confirm the increased duration displays immediately after confirmation.
+- [ ] Confirm `Done In` does not decrement immediately on confirmation.
+- [ ] Confirm `Done In` decrements only after end-of-turn water/work processing.
+- [ ] Confirm paused scripted-scene work does not decrement during the scene turn.
 
 ---
 
@@ -618,6 +661,7 @@ On the DM screen:
 - [ ] Assign that crew member to `Cast Fishing Net`, `Harpoon Fishing`, or the equivalent fishing action.
 - [ ] Confirm all actions.
 - [ ] Confirm the fishing prompt text reflects Fisherman advantage.
+- [ ] Confirm the prompt card shows a visible text-accessible advantage marker.
 - [ ] Resolve the prompt.
 - [ ] Confirm the log records the fishing result cleanly.
 
@@ -681,6 +725,8 @@ On the DM screen:
 On the player screen:
 
 - [ ] Confirm player-facing state updates cleanly after the scripted scene turn.
+- [ ] If a crew member had ongoing work preserved by the scene, confirm the player view shows forced idle plus the preserved work in parentheses or secondary text.
+- [ ] Confirm the preserved-work text is clear, such as `Forced Idle — Scene/Hazard (preserving Reset Fishing Net)` or equivalent wording.
 - [ ] Confirm no broken or duplicated crew actions appear.
 
 ---
@@ -700,6 +746,23 @@ On the DM screen:
 - [ ] Confirm the imported crew names restore correctly.
 - [ ] Confirm the log records the import.
 - [ ] Confirm the player screen updates after import.
+
+## Regression Import: Manual Prompts with No DC
+
+Use the previously failed export file if available, or create an export that contains manual/resolved prompts with `dc: null`.
+
+Then:
+
+- [ ] Import the file.
+- [ ] Confirm the import succeeds.
+- [ ] Confirm manual prompts without a DC do not cause a validation error.
+- [ ] Confirm normal prompts with numeric DCs still import correctly.
+- [ ] Confirm invalid DC values in intentionally bad files are still rejected.
+
+Expected behavior:
+
+- `dc: null` is valid for manual or non-roll prompts.
+- Invalid DC values, such as negative numbers or objects, should still fail import validation.
 
 ## Invalid Import
 
@@ -793,6 +856,8 @@ Player screen:
 ---
 
 # 26. Final Pass Before Commit
+
+After this bugfix pass, specifically retest Demo Reset, the previously failed import, advantage/disadvantage markers, `Done In` timing, forced-idle preserved work, and the player-facing Bilge Rod label.
 
 Before committing a major change:
 

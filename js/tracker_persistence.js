@@ -734,11 +734,15 @@ function playerCrewAction(name) {
   const plannedAction = actionById(state.plannedActions?.[name]);
   if (state.scriptedSceneTurn && plannedAction?.id === 'idle') {
     const preservedActionName = preservedOngoingActionName(name);
-    if (preservedActionName)
-      return `Forced Idle — Scene/Hazard (preserving ${preservedActionName})`;
+    return scriptedScenePlayerAction(preservedActionName);
   }
   if (plannedAction) return plannedAction.name;
   return crewByName(name)?.lastAction || '';
+}
+
+function scriptedScenePlayerAction(pausedActionName) {
+  if (pausedActionName) return `Responding to Event — ${pausedActionName} paused`;
+  return 'Responding to Event';
 }
 
 function preservedOngoingActionName(name) {
