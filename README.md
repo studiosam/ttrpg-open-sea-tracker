@@ -10,7 +10,7 @@ This project is currently built around the Marrowwind voyage, but the long-term 
 
 # Current Status
 
-This project is a working MVP.
+This project is a working MVP and public demo.
 
 ---
 
@@ -41,7 +41,7 @@ Current features include:
 - Setup validation
 - Save-overwrite protection
 - Resume current browser save
-- Import exported voyage saves
+- Import Open Sea Tracker voyage exports only
 - Turn-flow guidance
 - Open Sea Event handling
 - Scripted scene turns
@@ -54,6 +54,7 @@ Current features include:
 - Player knowledge and hidden information
 - Save, load, export, import, reset, and undo
 - Input validation and import hardening
+- App-styled confirmation and error modals
 - Automated test suite
 - GitHub Actions CI
 - Manual browser testing checklist
@@ -76,7 +77,7 @@ Choose one of the startup actions:
 
 - **Start a New Voyage**: opens the setup screen.
 - **Resume Current Voyage**: resumes the saved voyage stored in this browser.
-- **Import Saved Voyage**: imports a previously exported tracker `.json` file.
+- **Import Saved Voyage**: imports a previously exported Open Sea Tracker `.json` file.
 - **Load Demo Voyage**: opens a temporary default Marrowwind voyage without replacing the saved browser voyage.
 
 If no saved voyage exists in the current browser profile, **Resume Current Voyage** should be unavailable.
@@ -87,7 +88,7 @@ To start a new voyage:
 2. Configure the voyage preset, ship name, crew size, crew names, and crew traits.
 3. Fix any setup validation errors.
 4. Click **Start Voyage**.
-5. If an existing save is present, confirm that you want to replace it.
+5. If an existing save is present, confirm the app-styled overwrite modal.
 
 **Start Voyage** creates the tracker state, saves it to browser storage, publishes the player-safe state, and enters the tracker screen.
 
@@ -233,6 +234,7 @@ The formal test suite loads the browser scripts in a Node VM and checks:
 - Browser validation suite behavior
 - State restoration after validation
 - Import validation
+- Strict Open Sea Tracker export identity validation
 - Import migration
 - Unsafe import rejection
 - Out-of-range import rejection
@@ -245,16 +247,19 @@ The formal test suite loads the browser scripts in a Node VM and checks:
 - Setup validation
 - Setup-created tracker state
 - Save-overwrite protection
+- App-styled confirmation and alert modals
 - Old save migration
 - New voyage creation
 - Setup-created player state
 - Demo Mode no-save behavior
 - Demo save conversion behavior
+- Demo reset and real-save preservation
 - DM tracker Open Player View link
 - Player travel rounding
 - Navigate reveal behavior
 - Water visibility behavior
 - Player effect rendering
+- Repair-material gates and Salvage Lumber
 - Scripted scene behavior
 
 The browser behavior checklist is in:
@@ -346,8 +351,8 @@ Setup behavior:
 - **Start Voyage** validates the setup.
 - Invalid setup stays on the setup screen and shows errors.
 - Valid setup creates the tracker state, saves it, publishes player state, and enters tracker mode.
-- If an existing save is present, the app asks before replacing it.
-- Cancelling the overwrite confirmation preserves the existing saved voyage and the existing published player state.
+- If an existing save is present, the app shows an app-styled confirmation before replacing it.
+- Cancelling the overwrite confirmation modal preserves the existing saved voyage and the existing published player state.
 
 Crew traits affect existing advantage prompt text:
 
@@ -386,8 +391,8 @@ Important behavior:
 - Ongoing multi-turn work is automatically selected on following turns.
 - Use `Clear` on a character row to clear that character's planned action.
 - Use `Set Unset to Idle` to quickly fill empty actions before advancing.
-- Repair actions cannot be confirmed without enough Repair Supplies.
-- `Salvage Lumber` is a 1-person, 1-turn, 1-Labor action that adds 2 Repair Supplies.
+- Repair actions cannot be confirmed without enough Repair Materials / Repair Supplies.
+- `Salvage Lumber` is a 1-person, 1-turn, 1-Labor action that adds 2 Repair Materials.
 - `Salvage Lumber` includes an above/below-deck checkbox. If it is below deck, flooding penalties apply.
 
 ---
@@ -572,7 +577,7 @@ Important behavior:
 - **Back to Landing** and **Reset Setup Defaults** do not replace the current save.
 - **Load Demo Voyage** creates a temporary demo and does not overwrite the current saved voyage.
 - Demo Mode changes are temporary unless the DM explicitly saves the demo as the current saved voyage.
-- Saving while in Demo Mode asks for confirmation before replacing the current saved voyage.
+- Saving while in Demo Mode shows an app-styled confirmation before replacing the current saved voyage.
 - Use **Resume Current Voyage** on the landing screen to resume the saved browser state.
 - Use **Save** on the DM screen to manually save the full tracker state.
 - Use **Export** to download the current tracker state as a `.json` backup file.

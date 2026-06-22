@@ -10,9 +10,9 @@ The project began as the Marrowwind voyage tracker for one campaign. The long-te
 
 The project is a working MVP and public demo.
 
-The core tracker can now be used at the table with a DM screen and a player-facing screen. It has automated tests, formatting checks, syntax checks, GitHub Actions CI, manual browser testing documentation, import/export support, save protection, a functional new-voyage setup flow, GitHub Pages deployment, README screenshots, an `Open Player View` control, and a no-save Demo Mode.
+The core tracker can now be used at the table with a DM screen and a player-facing screen. It has automated tests, formatting checks, syntax checks, GitHub Actions CI, manual browser testing documentation, strict import/export identity validation, save protection, a functional new-voyage setup flow, GitHub Pages deployment, README screenshots, an `Open Player View` control, app-styled confirmation/error modals, and a no-save Demo Mode.
 
-The README, roadmap, and manual testing checklist have been updated for Demo Mode. The next step is a focused browser testing pass using `docs/MANUAL_TESTING.md`.
+The documentation has been updated to reflect the current app state. The next step is a focused browser testing pass using `docs/MANUAL_TESTING.md`.
 
 ---
 
@@ -22,6 +22,7 @@ The README, roadmap, and manual testing checklist have been updated for Demo Mod
 - Player-facing display screen.
 - Browser `localStorage` saving.
 - Export and import.
+- Strict Open Sea Tracker export identity validation.
 - Import validation and migration.
 - Undo support.
 - Turn-flow guidance.
@@ -46,6 +47,9 @@ The README, roadmap, and manual testing checklist have been updated for Demo Mod
 - DM tracker `Open Player View` link.
 - No-save Demo Mode.
 - Demo-to-real-save conversion.
+- App-styled confirmation and error modals.
+- Compact setup-screen layout.
+- Landing-page layout polish.
 
 ---
 
@@ -192,6 +196,8 @@ Focus areas:
 - Existing-save overwrite protection.
 - Resume current voyage.
 - Import saved voyage.
+- Strict unrelated-JSON import rejection.
+- App-styled confirmation and error modals.
 - DM tracker load.
 - Player view sync.
 - `Open Player View` button.
@@ -234,6 +240,9 @@ Recently completed:
 - Removed the stale changelog reference from the README.
 - Confirmed no separate changelog is needed.
 - Updated manual testing notes for setup field max-length behavior.
+- Added strict Open Sea Tracker export identity checks.
+- Replaced browser confirmation/error dialogs with app-styled modals.
+- Updated action documentation for current implemented mechanics.
 
 ---
 

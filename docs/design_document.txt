@@ -67,11 +67,22 @@ Implementation conventions:
 
 ## Save Import Safety
 
-Import should accept exported tracker JSON and compatible older tracker-state shapes, then migrate them to the current state model.
+Import should accept only JSON files explicitly exported by Open Sea Tracker.
+
+Exported tracker files must include:
+
+* `appId: "open-sea-tracker"`
+* `exportType: "tracker-state"`
+* the current app `version`
+
+The file import path must verify that identity before running state validation, migration, or normalization. Unrelated JSON files, including valid JSON from other tools, must be rejected before they can be interpreted as tracker state.
 
 Import must reject:
 
 * Non-object JSON payloads.
+* Arrays and `null`.
+* Payloads missing the Open Sea Tracker identity fields.
+* Payloads with the wrong `appId` or `exportType`.
 * Oversized files.
 * Unsafe object keys such as `__proto__`, `constructor`, or `prototype`.
 * Invalid number fields, invalid status fields, malformed crew entries, or malformed state maps.
@@ -94,13 +105,13 @@ Each ship turn follows this order:
 
 Water update formula:
 
-`Water Level = Water Level + Water Ingress - Pumping - Completed Buckets`
+`Water Level = Water Level + Minimum Water Ingress + Active Leaks - Pumping - Completed Buckets`
 
 Water Level cannot go below 0.
 
 ## Characters
 
-Track these six characters:
+Track an active crew of 4-7 characters. The default Marrowwind crew is:
 
 * Leopold
 * Delilah
@@ -108,6 +119,8 @@ Track these six characters:
 * Xander
 * Grumbo
 * Tommy
+
+Setup determines the final active crew size and names before a voyage starts.
 
 Each character needs:
 
@@ -124,7 +137,7 @@ Each character needs:
 
 Do not hide characters behind a single shared action selector.
 
-Each character should appear as a visible row or card with their name and an action control, such as a dropdown or compact button set. The DM should be able to assign all six characters' actions and review the full turn plan before clicking Resolve Turn.
+Each active character should appear as a visible row or card with their name and an action control, such as a dropdown or compact button set. The DM should be able to assign every active character's action and review the full turn plan before committing the action plan.
 
 Include a visible Current Turn Plan panel:
 
@@ -192,7 +205,7 @@ Track:
 * Food
 * Water
 * Salvaged Timber
-* Repair Materials, if implemented
+* Repair Materials
 
 Water Ingress formula:
 
@@ -338,14 +351,17 @@ Man Helm
 Operate Bilge Pump
 
 * Requires Bilge Pump Working.
-* Reduces Water Level by 2 during turn resolution.
+* Solo pump is a Strength DC 15 check.
+* Solo success reduces Water Level by 3.
+* Solo failure reduces Water Level by 2.
 
 Repair Active Leak
 
 * Repairs 1 Active Leak.
 * Automatic, no skill check.
 * Normally 1 Turn and 1 Labor for 2 Players.
-* Requires 1 Repair Supply per leak repaired.
+* Requires 1 Repair Material per leak repaired.
+* Cannot be confirmed if there are not enough Repair Materials.
 * If Water Level is 5+, takes +1 turn.
 * If Water Level is 10+, costs +1 additional Labor.
 
@@ -353,13 +369,15 @@ Repair Bilge Pump
 
 * Repairs Jammed pump.
 * Normally 1 turn and 1 Labor.
-* Requires 1 Repair Supply.
+* Requires 1 Repair Material.
+* Cannot be confirmed if there are not enough Repair Materials.
 
 Repair Rigging
 
 * Repairs Broken rigging.
 * Normally 1 turn and 1 Labor.
-* Requires 1 Repair Supply.
+* Requires 1 Repair Material.
+* Cannot be confirmed if there are not enough Repair Materials.
 * Character repairing rigging makes DC 13 Dexterity save or takes 2d6 bludgeoning damage.
 
 Reset Fishing Net
@@ -373,13 +391,12 @@ Recover Floating Wreckage
 * 1 turn.
 * 1 Labor.
 * DC 12 Dexterity or Athletics.
-* On success, gain salvaged timber.
-* Salvaged timber may be consumed at any future time to repair two Active Leaks without Labor.
+* On success, gain salvaged timber for DM adjudication.
 
 Salvage Lumber
 
 * Normally 1 turn and 1 Labor for 1 player.
-* Adds 2 Repair Supplies when completed.
+* Adds 2 Repair Materials when completed.
 * Roleplay determines whether the salvage is above deck or below deck.
 * If marked below deck, flooding penalties apply as normal.
 
@@ -405,7 +422,7 @@ Cast Net
 * Takes 1 turn.
 * Each participant gains 1 Labor.
 * Survival DC 15.
-* Success: +0.5 days Food.
+* Each success adds +0.25 days Food.
 * After use, Net becomes Tangled.
 * If School of Fish event is active, roll with advantage.
 * Fisherman background grants advantage to that participant's fishing check.
@@ -426,8 +443,9 @@ Major Repair: Mast or Rudder
 
 * Requires 2 players.
 * Takes 2 turns.
-* Costs Labor according to the current tracker design.
-* Requires 1 Repair Supply.
+* Costs 2 Labor per participating character when started.
+* Requires 1 Repair Material.
+* Cannot be confirmed if there are not enough Repair Materials.
 * If Water Level is 5+, takes +1 turn.
 * If Water Level is 10+, costs +1 additional Labor.
 * Mast controls sail progress; while broken, Helm cannot make travel progress.
@@ -448,7 +466,7 @@ Roll 1d20 each ship turn.
 |   12 | Rigging Snaps. Random creature on deck makes DC 13 Dexterity save or takes 2d6 bludgeoning damage. Rigging can be repaired with 1 turn and 1 Labor.                                            |
 |   13 | Pack of Gulls. Run encounter using Swarm of Ravens stat block flavored as gulls. If not dispatched in 3 combat rounds, lose 0.5 days Food.                                                     |
 |   14 | Bilge Pump Jams. Pump unusable until repaired. Bucket Brigades still function.                                                                                                                 |
-|   15 | Floating Wreckage. Recovering it costs 1 turn, 1 Labor, DC 12 Dexterity or Athletics. On success, salvaged timber may be consumed at any future time to repair two Active Leaks without Labor. |
+|   15 | Floating Wreckage. Recovering it costs 1 turn, 1 Labor, DC 12 Dexterity or Athletics. On success, gain salvaged timber for DM adjudication. |
 |   16 | School of Fish. The next Cast Net action this turn has advantage. Harpoons gain no benefit.                                                                                                    |
 |   17 | Calm Seas. The helmsman recovers 1 Labor instead of gaining 1 while steering this turn.                                                                                                        |
 |   18 | Large Shadow. A massive shape circles beneath the ship. It may be targeted with the harpoon, subject to visibility.                                                                            |
@@ -557,17 +575,16 @@ Example post-Bev state if the party runs him off after a fight:
 
 If repair supplies are gone, the party can scavenge ship parts manually.
 
-## Scavenge Ship Parts
+## Salvage Lumber
 
-Optional action if supplies are scarce.
+Implemented action for recovering repair materials when supplies are scarce.
 
-Scavenge Materials
-
-* 1 turn.
+* 1 turn before flooding penalties.
 * 1 Labor.
-* Tear apart nonessential parts of the ship such as furniture, bunks, railings, doors, barrels, or decorative planking.
-* Gain 1 Repair Material or equivalent.
-* DM may apply a cost, such as cargo loss, reduced comfort, or worsening ship condition.
+* Roleplay determines whether the work happens above deck or below deck.
+* If marked below deck, normal flooding penalties apply.
+* Gain 2 Repair Materials.
+* DM may apply a narrative cost, such as cargo loss, reduced comfort, or worsening ship condition.
 
 ## Meals and Overnight Rest
 
@@ -683,10 +700,12 @@ Recommended layout:
 
 * Top summary bar: Day, Turn, Travel Remaining, Food, Water.
 * Ship panel: Water Level, Minimum Ingress, Active Leaks, Water Ingress, ship systems.
-* Crew panel: six character cards.
+* Crew panel: one visible card or row for each active crew member.
 * Action panel: visible action controls for each character.
 * Turn Plan panel: full list of assigned actions.
 * Event panel: Open Sea Event table and active conditions.
 * Log panel: records turn results and manual changes.
 
 Avoid tiny text. Use high-contrast colors and large buttons suitable for a live table display.
+
+Use app-styled modal dialogs for confirmations and recoverable errors instead of browser-native `confirm()` or `alert()` dialogs. This applies to save overwrite confirmations, Demo Mode save conversion, tracker reset, import failures, and validation alerts that need explicit DM acknowledgement.

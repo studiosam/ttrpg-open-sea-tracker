@@ -1,4 +1,4 @@
-# Manual Testing Checklist
+﻿# Manual Testing Checklist
 
 This checklist covers browser behavior that the automated Node tests do not fully prove.
 
@@ -199,7 +199,7 @@ Before resetting:
 Then:
 
 - [ ] Click `Reset`.
-- [ ] Confirm the reset prompt appears.
+- [ ] Confirm the app-styled reset modal appears.
 - [ ] Confirm the reset.
 - [ ] Confirm the app remains in Demo Mode.
 - [ ] Confirm the Demo Mode banner remains visible.
@@ -221,13 +221,13 @@ Expected behavior:
 With Demo Mode loaded:
 
 - [ ] Click `Save`.
-- [ ] Confirm a warning appears before converting the demo into the current saved voyage.
-- [ ] Cancel the warning.
+- [ ] Confirm an app-styled modal appears before converting the demo into the current saved voyage.
+- [ ] Cancel the modal.
 - [ ] Confirm the app remains in Demo Mode.
 - [ ] Confirm the Demo Mode banner remains visible.
 - [ ] Confirm the existing real save was not overwritten.
 - [ ] Click `Save` again.
-- [ ] Confirm the warning.
+- [ ] Confirm the modal.
 - [ ] Confirm the demo is saved as the current real voyage.
 - [ ] Confirm the Demo Mode banner disappears.
 - [ ] Confirm the activity log records that the demo was saved as a real voyage.
@@ -348,7 +348,7 @@ From the setup screen:
 - [ ] Change at least one active crew name.
 - [ ] Change at least one background/proficiency checkbox.
 - [ ] Click `Start Voyage`.
-- [ ] If an overwrite confirmation appears, confirm it.
+- [ ] If an overwrite confirmation appears, confirm it in the app-styled modal.
 - [ ] Confirm the app enters tracker mode.
 - [ ] Confirm the custom ship name appears on the DM screen.
 - [ ] Confirm the active crew names appear on the DM screen.
@@ -362,7 +362,7 @@ Optional trait check:
 
 - [ ] Assign an action affected by a changed trait, such as Helm, Navigate, or Fishing.
 - [ ] Confirm the relevant prompt text reflects the selected background/proficiency advantage source.
-- [ ] Confirm the prompt card shows a visible text-accessible advantage marker, such as `▲ Advantage` or equivalent wording.
+- [ ] Confirm the prompt card shows a visible text-accessible advantage marker, such as `â–² Advantage` or equivalent wording.
 
 ---
 
@@ -376,15 +376,15 @@ Then:
 - [ ] Click `Start a New Voyage`.
 - [ ] Change the setup ship name.
 - [ ] Click `Start Voyage`.
-- [ ] Confirm an overwrite warning appears.
-- [ ] Cancel the warning.
+- [ ] Confirm an app-styled overwrite modal appears.
+- [ ] Cancel the modal.
 - [ ] Confirm the app remains on the setup screen.
 - [ ] Click `Back to Landing`.
 - [ ] Click `Resume Current Voyage`.
 - [ ] Confirm the old saved voyage is still intact.
 - [ ] Repeat the setup flow.
 - [ ] Click `Start Voyage`.
-- [ ] Confirm the overwrite warning.
+- [ ] Confirm the overwrite modal.
 - [ ] Confirm the new configured voyage replaces the old save.
 
 Expected behavior:
@@ -725,8 +725,8 @@ On the DM screen:
 On the player screen:
 
 - [ ] Confirm player-facing state updates cleanly after the scripted scene turn.
-- [ ] If a crew member had ongoing work preserved by the scene, confirm the player view shows forced idle plus the preserved work in parentheses or secondary text.
-- [ ] Confirm the preserved-work text is clear, such as `Forced Idle — Scene/Hazard (preserving Reset Fishing Net)` or equivalent wording.
+- [ ] If a crew member had ongoing work paused by the scene, confirm the player view says the crew is responding to the event and the work is paused.
+- [ ] Confirm the paused-work text is clear, such as `Responding to Event — Reset Fishing Net paused`.
 - [ ] Confirm no broken or duplicated crew actions appear.
 
 ---
@@ -752,7 +752,7 @@ On the DM screen:
 
 ## Regression Import: Manual Prompts with No DC
 
-Use the previously failed export file if available, or create an export that contains manual/resolved prompts with `dc: null`.
+Use a current Open Sea Tracker export that contains manual/resolved prompts with `dc: null`. If reusing an older failed file, first confirm it includes `"appId": "open-sea-tracker"` and `"exportType": "tracker-state"`; otherwise the identity check should reject it before DC validation.
 
 Then:
 
@@ -783,7 +783,7 @@ Then:
 
 - [ ] Try to import the bad file.
 - [ ] Confirm the import is rejected.
-- [ ] Confirm an error message appears.
+- [ ] Confirm an app-styled `Import Failed` modal appears instead of a browser/system alert.
 - [ ] Confirm the current tracker state is not damaged.
 - [ ] Confirm the app still works after the failed import.
 
@@ -805,7 +805,7 @@ Then:
 
 - [ ] Try to import the unrelated JSON file.
 - [ ] Confirm the import is rejected.
-- [ ] Confirm the error message clearly says the file is not an Open Sea Tracker export.
+- [ ] Confirm the app-styled error modal clearly says the file is not an Open Sea Tracker export.
 - [ ] Confirm the current tracker state is not damaged.
 - [ ] Confirm the app still works after the failed import.
 
@@ -882,7 +882,7 @@ Player screen:
 
 # 26. Final Pass Before Commit
 
-After this bugfix pass, specifically retest Demo Reset, the previously failed import, advantage/disadvantage markers, `Done In` timing, forced-idle preserved work, and the player-facing Bilge Rod label.
+Before committing a major change, specifically retest Demo Reset, strict import/export identity, unrelated JSON rejection, app-styled confirmation/error modals, advantage/disadvantage markers, `Done In` timing, scripted-scene paused-work text, and the player-facing Bilge Rod label.
 
 Before committing a major change:
 
