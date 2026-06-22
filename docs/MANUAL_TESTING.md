@@ -362,7 +362,7 @@ Optional trait check:
 
 - [ ] Assign an action affected by a changed trait, such as Helm, Navigate, or Fishing.
 - [ ] Confirm the relevant prompt text reflects the selected background/proficiency advantage source.
-- [ ] Confirm the prompt card shows a visible text-accessible advantage marker, such as `â–² Advantage` or equivalent wording.
+- [ ] Confirm the prompt card shows a visible text-accessible advantage marker, such as `▲ Advantage` or equivalent wording.
 
 ---
 
